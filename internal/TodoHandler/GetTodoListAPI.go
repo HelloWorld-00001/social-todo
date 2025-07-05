@@ -16,7 +16,7 @@ func GetToDoList(db *gorm.DB) func(*gin.Context) {
 		business := BusinessUseCases.GetNewGetTodoListLogic(store)
 		pagination := common.Pagination{}
 		if err := c.ShouldBindQuery(&pagination); err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			c.JSON(http.StatusBadRequest, common.NewInvalidInputError(err))
 			return
 		}
 		log.Println(pagination)
@@ -24,7 +24,7 @@ func GetToDoList(db *gorm.DB) func(*gin.Context) {
 
 		result, err := business.GetTodoList(c, nil, &pagination)
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			c.JSON(http.StatusInternalServerError, err)
 			return
 		}
 

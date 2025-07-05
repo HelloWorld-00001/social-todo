@@ -1,6 +1,7 @@
 package BusinessUseCases
 
 import (
+	"github.com/coderconquerer/go-login-app/internal/common"
 	"github.com/coderconquerer/go-login-app/internal/models"
 	"github.com/gin-gonic/gin"
 )
@@ -19,7 +20,7 @@ func GetNewCreateTodoLogic(store CreateTodoStorage) *CreateTodoLogic {
 
 func (bz *CreateTodoLogic) CreateTodoItem(c *gin.Context, todo *models.TodoCreation) error {
 	if err := bz.store.CreateTodoItem(c, todo); err != nil {
-		return err
+		return common.NewCannotCreateEntity(models.TodoTableName, err)
 	}
 	return nil
 }

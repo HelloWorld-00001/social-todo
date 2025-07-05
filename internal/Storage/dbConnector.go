@@ -2,6 +2,7 @@ package Storage
 
 import (
 	"fmt"
+	"github.com/coderconquerer/go-login-app/internal/common"
 	"github.com/coderconquerer/go-login-app/pkg/config"
 	_ "github.com/go-sql-driver/mysql"
 	"gorm.io/driver/mysql"
@@ -23,7 +24,7 @@ func GetMySQLConnection(cfg *config.Config) (*gorm.DB, error) {
 
 	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
 	if err != nil {
-		return nil, err
+		return nil, common.NewDatabaseError(err)
 	}
 
 	return db, nil

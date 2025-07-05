@@ -16,12 +16,12 @@ func CreateTodoItem(db *gorm.DB) func(*gin.Context) {
 		business := BusinessUseCases.GetNewCreateTodoLogic(store)
 		var todo models.TodoCreation
 		if err := c.ShouldBind(&todo); err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			c.JSON(http.StatusBadRequest, common.NewInvalidInputError(err))
 			return
 		}
 		err := business.CreateTodoItem(c, &todo)
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			c.JSON(http.StatusInternalServerError, err)
 			return
 		}
 

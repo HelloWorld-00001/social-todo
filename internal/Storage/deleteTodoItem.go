@@ -1,6 +1,7 @@
 package Storage
 
 import (
+	"github.com/coderconquerer/go-login-app/internal/common"
 	"github.com/coderconquerer/go-login-app/internal/models"
 	"github.com/gin-gonic/gin"
 	"time"
@@ -13,7 +14,7 @@ func (db *MySQLConnection) DeleteTodoItem(c *gin.Context, id int) error {
 		"Deleted_Date": currentTime,
 		"UpdateTime":   currentTime,
 	}).Error; err != nil {
-		return err
+		return common.NewDatabaseError(err)
 	}
 
 	return nil

@@ -1,6 +1,7 @@
 package Storage
 
 import (
+	"github.com/coderconquerer/go-login-app/internal/common"
 	"github.com/coderconquerer/go-login-app/internal/models"
 	"github.com/gin-gonic/gin"
 	"time"
@@ -14,7 +15,7 @@ func (db *MySQLConnection) CreateTodoItem(c *gin.Context, todo *models.TodoCreat
 	todo.UpdateTime = currentTime
 
 	if err := dbc.Create(todo).Error; err != nil {
-		return err
+		return common.NewDatabaseError(err)
 	}
 
 	return nil

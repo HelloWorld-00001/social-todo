@@ -21,7 +21,7 @@ func GetNewGetTodoListLogic(store GetTodoListStorage) *GetTodoListLogic {
 func (bz *GetTodoListLogic) GetTodoList(c *gin.Context, filter *common.Filter, pagination *common.Pagination) ([]models.Todo, error) {
 	data, err := bz.store.GetTodoList(c, filter, pagination)
 	if err != nil {
-		return nil, err
+		return nil, common.NewCannotGetEntity(models.TodoTableName, err)
 	}
 	return data, nil
 }

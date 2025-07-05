@@ -16,11 +16,12 @@ func GetTodoDetail(db *gorm.DB) func(*gin.Context) {
 		business := BusinessUseCases.GetNewGetTodoDetailLogic(store)
 		id, err := strconv.Atoi(c.Param("id"))
 		if err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			c.JSON(http.StatusBadRequest, common.NewInvalidInputError(err))
+			return
 		}
 		result, err := business.GetTodoDetail(c, id)
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			c.JSON(http.StatusInternalServerError, err)
 			return
 		}
 

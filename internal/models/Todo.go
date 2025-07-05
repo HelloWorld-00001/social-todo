@@ -5,8 +5,12 @@ import (
 )
 
 func (Todo) TableName() string {
-	return "Todo"
+	return TodoTableName
 }
+
+var (
+	TodoTableName = "Todo"
+)
 
 type Todo struct {
 	TodoID      int        `gorm:"column:Id;primaryKey;autoIncrement" json:"id"`

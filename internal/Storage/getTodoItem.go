@@ -1,8 +1,11 @@
 package Storage
 
 import (
+	"errors"
+	"github.com/coderconquerer/go-login-app/internal/common"
 	"github.com/coderconquerer/go-login-app/internal/models"
 	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
 )
 
 func (db *MySQLConnection) GetTodoItemDetailById(c *gin.Context, id int) (*models.Todo, error) {
@@ -15,7 +18,10 @@ func (db *MySQLConnection) GetTodoItemDetailById(c *gin.Context, id int) (*model
 	dbc = dbc.Where("Deleted_Date is null")
 
 	if err := dbc.Where("Id = ?", id).First(&todo).Error; err != nil {
-		return nil, err
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, err
+		}
+		return nil, common.NewDatabaseError(err)
 	}
 
 	return &todo, nil

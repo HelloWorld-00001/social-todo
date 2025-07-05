@@ -33,7 +33,8 @@ func main() {
 	swaggerSetup()
 
 	r := gin.Default()
-
+	//r.Use(gin.Logger())
+	//r.Use(middleware.CustomRecovery()) // custom middleware
 	//auth := r.Group("/")b
 	store := cookie.NewStore([]byte("super-secret-key"))
 

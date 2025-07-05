@@ -1,6 +1,7 @@
 package BusinessUseCases
 
 import (
+	"github.com/coderconquerer/go-login-app/internal/common"
 	"github.com/coderconquerer/go-login-app/internal/models"
 	"github.com/gin-gonic/gin"
 )
@@ -20,7 +21,7 @@ func GetNewGetTodoDetailLogic(store GetTodoDetailStorage) *GetTodoDetailLogic {
 func (bz *GetTodoDetailLogic) GetTodoDetail(c *gin.Context, id int) (*models.Todo, error) {
 	data, err := bz.store.GetTodoItemDetailById(c, id)
 	if err != nil {
-		return nil, err
+		return nil, common.NewCannotGetEntity(models.TodoTableName, err)
 	}
 	return data, nil
 }

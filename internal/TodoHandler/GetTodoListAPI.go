@@ -1,4 +1,4 @@
-package Handler
+package TodoHandler
 
 import (
 	"github.com/coderconquerer/go-login-app/internal/BusinessUseCases"

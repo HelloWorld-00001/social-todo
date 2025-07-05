@@ -4,9 +4,8 @@ import (
 	"fmt"
 	"github.com/coderconquerer/go-login-app/docs"
 	_ "github.com/coderconquerer/go-login-app/docs"
-	td "github.com/coderconquerer/go-login-app/internal"
-	"github.com/coderconquerer/go-login-app/internal/Handler"
 	db "github.com/coderconquerer/go-login-app/internal/Storage"
+	"github.com/coderconquerer/go-login-app/internal/TodoHandler"
 	al "github.com/coderconquerer/go-login-app/internal/accountLogic"
 	"github.com/coderconquerer/go-login-app/pkg/config"
 	"github.com/gin-contrib/sessions"
@@ -42,16 +41,11 @@ func main() {
 	{
 		todoRoutes := v1.Group("/todo")
 		{
-			todoRoutes.GET("", Handler.GetToDoList(database))
-			todoRoutes.PUT("/:id", func(c *gin.Context) {
-				td.GetAllTodos(c, database) // Pass db here
-			})
-			todoRoutes.DELETE("/:id", func(c *gin.Context) {
-				td.GetAllTodos(c, database) // Pass db here
-			})
-			todoRoutes.POST("/", func(c *gin.Context) {
-				td.GetAllTodos(c, database) // Pass db here
-			})
+			todoRoutes.GET("", TodoHandler.GetToDoList(database))
+			todoRoutes.GET("/:id", TodoHandler.GetTodoDetail(database))
+			//todoRoutes.PUT("/:id", TodoHandler.GetTodoDetail(database))
+			todoRoutes.DELETE("/:id", TodoHandler.DeleteTodoItem(database))
+			todoRoutes.POST("/", TodoHandler.CreateTodoItem(database))
 		}
 
 	}

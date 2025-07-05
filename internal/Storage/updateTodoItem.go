@@ -4,28 +4,25 @@ import (
 	"github.com/coderconquerer/go-login-app/internal/common"
 	"github.com/coderconquerer/go-login-app/internal/models"
 	"github.com/gin-gonic/gin"
-	"log"
 )
 
-func (db *MySQLConnection) GetTodoList(c *gin.Context, filter *common.Filter, pagination *common.Pagination) ([]models.Todo, error) {
+func (db *MySQLConnection) UpdateTodoItem(c *gin.Context, filter *common.Filter, pagination *common.Pagination) ([]models.Todo, error) {
 	var todos []models.Todo
 	// filter deleted first
 	dbc := db.conn.Table(models.Todo{}.TableName())
 
-	dbc = dbc.Where("DeletedDate is null")
+	dbc = dbc.Where("deleted_date is null")
 	if filter != nil {
 		if stt := filter.Status; stt != "" {
-			dbc.Where("Status = ?", stt)
+			dbc.Where("status = ?", stt)
 		}
 	}
 
-	if err := dbc.Select("Todo_Id").Count(&pagination.Total).Error; err != nil {
+	if err := dbc.Select("id").Count(&pagination.Total).Error; err != nil {
 		return nil, err
 	}
-	log.Println("heheh")
-	log.Println(pagination)
 
-	if err := dbc.Select("*").Order("Todo_Id desc").
+	if err := dbc.Select("*").Order("id desc").
 		Offset((pagination.Page - 1) * pagination.Limit).
 		Limit(pagination.Limit).
 		Find(&todos).Error; err != nil {

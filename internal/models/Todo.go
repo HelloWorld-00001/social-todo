@@ -9,13 +9,13 @@ func (Todo) TableName() string {
 }
 
 type Todo struct {
-	TodoID      int        `gorm:"column:Todo_Id;primaryKey;autoIncrement" json:"todo_id"`
+	TodoID      int        `gorm:"column:Id;primaryKey;autoIncrement" json:"id"`
 	Description string     `gorm:"column:Description;type:text;" json:"description"`
 	Status      string     `gorm:"column:Status" json:"status"`
 	UpdateTime  time.Time  `gorm:"column:UpdateTime" json:"update_time"`
 	CreateTime  time.Time  `gorm:"column:CreateTime" json:"create_time"`
 	Deadline    time.Time  `gorm:"column:Deadline" json:"deadline"`
-	DeletedDate *time.Time `gorm:"column:DeletedDate" json:"deleted_date,omitempty"`
+	DeletedDate *time.Time `gorm:"column:Deleted_Date" json:"deleted_date,omitempty"`
 	Label       string     `gorm:"column:Label" json:"label"`
 	TagColor    string     `gorm:"column:TagColor" json:"tag_color"`
 	Workspace   string     `gorm:"column:workspace" json:"workspace"`
@@ -29,4 +29,31 @@ type Todo struct {
 	Metadata  []Metadata `gorm:"foreignKey:TodoID" json:"metadata,omitempty"`
 	Comments  []Comment  `gorm:"foreignKey:TodoID" json:"comments,omitempty"`
 	Reactions []Reaction `gorm:"foreignKey:TodoID" json:"reactions,omitempty"`
+}
+
+type UpdateTodo struct {
+	TodoID      int       `gorm:"column:Id;primaryKey;autoIncrement" json:"-"`
+	Description string    `gorm:"column:Description;type:text;" json:"description"`
+	Status      string    `gorm:"column:Status" json:"status"`
+	UpdateTime  time.Time `gorm:"column:UpdateTime" json:"-"`
+	Deadline    time.Time `gorm:"column:Deadline" json:"deadline"`
+	Label       string    `gorm:"column:Label" json:"label"`
+	TagColor    string    `gorm:"column:TagColor" json:"tag_color"`
+	Workspace   string    `gorm:"column:workspace" json:"workspace"`
+	Assignee    int       `gorm:"column:Assignee" json:"assignee"`
+	Title       string    `gorm:"column:Title" json:"title"`
+}
+
+type TodoCreation struct {
+	TodoID      int       `gorm:"column:Id;primaryKey;autoIncrement" json:"-"`
+	Description string    `gorm:"column:Description;type:text;" json:"description"`
+	Status      string    `gorm:"column:Status" json:"status"`
+	UpdateTime  time.Time `gorm:"column:UpdateTime" json:"-"`
+	CreateTime  time.Time `gorm:"column:CreateTime" json:"-"`
+	Deadline    time.Time `gorm:"column:Deadline" json:"deadline"`
+	Label       string    `gorm:"column:Label" json:"label"`
+	TagColor    string    `gorm:"column:TagColor" json:"tag_color"`
+	Workspace   string    `gorm:"column:workspace" json:"workspace"`
+	Assignee    int       `gorm:"column:Assignee" json:"assignee"`
+	Title       string    `gorm:"column:Title" json:"title"`
 }

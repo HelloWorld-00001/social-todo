@@ -34,7 +34,7 @@ VALUES
 ('blog_draft.txt', 'txt', 1024, NULL, NULL, 'https://files.com/blog.txt', 4),
 ('gym_invoice.pdf', 'pdf', 20480, NULL, NULL, 'https://files.com/gym.pdf', 5);
 
--- Update avatar field in User table (linking to metadata)
+-- Update avatar field in user table (linking to metadata)
 UPDATE `User` SET avatar = 1 WHERE User_Id = 1;
 UPDATE `User` SET avatar = 2 WHERE User_Id = 2;
 UPDATE `User` SET avatar = 3 WHERE User_Id = 3;

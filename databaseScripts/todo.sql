@@ -70,6 +70,6 @@ CREATE TABLE Reaction (
 );
 
 
--- Link between User and Account
+-- Link between user and Account
 ALTER TABLE `User`
 ADD CONSTRAINT fk_user_metadata FOREIGN KEY (avatar) REFERENCES Metadata(metadata_id);

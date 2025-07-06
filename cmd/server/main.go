@@ -11,6 +11,9 @@ import (
 	"github.com/coderconquerer/go-login-app/internal/common"
 	todoBuc "github.com/coderconquerer/go-login-app/internal/todoItem/BusinessUseCases"
 	todoStorage "github.com/coderconquerer/go-login-app/internal/todoItem/Storage"
+	userBuc "github.com/coderconquerer/go-login-app/internal/user/BusinessUseCases"
+	userHandler "github.com/coderconquerer/go-login-app/internal/user/Handler"
+	userStorage "github.com/coderconquerer/go-login-app/internal/user/Storage"
 
 	"github.com/coderconquerer/go-login-app/internal/components/tokenProviders/jwtProvider"
 	"github.com/coderconquerer/go-login-app/internal/middleware"
@@ -42,12 +45,19 @@ func main() {
 	disableBsn := accBuc.GetNewDisableAccountLogic(accStore)
 	accountHandler := AccountHandler.NewAccountHandler(loginBsn, registerBsn, disableBsn)
 
+	// to do service
 	todoStore := todoStorage.GetNewMySQLConnection(database)
 	getTodoDetailBz := todoBuc.GetNewGetTodoDetailLogic(todoStore)
 	getTodoListBz := todoBuc.GetNewGetTodoListLogic(todoStore)
 	createTodoListBz := todoBuc.GetNewCreateTodoLogic(todoStore)
 	deleteTodoListBz := todoBuc.GetNewDeleteTodoItemLogic(todoStore)
 	todoHandler := TodoHandler.NewTodoHandler(getTodoDetailBz, getTodoListBz, createTodoListBz, deleteTodoListBz)
+
+	// user service
+	userStore := userStorage.GetNewMySQLConnection(database)
+	getUserProfileBz := userBuc.GetNewFindUserLogic(userStore)
+	userHandler := userHandler.NewUserHandler(getUserProfileBz)
+
 	swaggerSetup()
 
 	r := gin.Default()
@@ -71,6 +81,7 @@ func main() {
 			todoRoutes.DELETE("/:id", authUser, todoHandler.DeleteTodoItem())
 			todoRoutes.POST("/", authUser, todoHandler.CreateTodoItem())
 		}
+		v1.GET("/profile", authUser, userHandler.GetUserProfile())
 		v1.POST("/login", accountHandler.Login())
 		v1.POST("/register", accountHandler.RegisterAccount())
 		v1.POST("/disable", authAdmin, accountHandler.DisableAccount())

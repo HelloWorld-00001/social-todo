@@ -83,7 +83,7 @@ const docTemplate = `{
                 "summary": "Login a account",
                 "parameters": [
                     {
-                        "description": "User credentials",
+                        "description": "user credentials",
                         "name": "account",
                         "in": "body",
                         "required": true,
@@ -147,7 +147,7 @@ const docTemplate = `{
                 "summary": "Register a new account",
                 "parameters": [
                     {
-                        "description": "User credentials",
+                        "description": "user credentials",
                         "name": "account",
                         "in": "body",
                         "required": true,

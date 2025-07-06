@@ -52,7 +52,7 @@ paths:
       - application/json
       description: Authenticate a account with a username and password
       parameters:
-      - description: User credentials
+      - description: user credentials
         in: body
         name: account
         required: true
@@ -94,7 +94,7 @@ paths:
       - application/json
       description: Register a new account with a username and password
       parameters:
-      - description: User credentials
+      - description: user credentials
         in: body
         name: account
         required: true

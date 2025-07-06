@@ -2,7 +2,7 @@ package internal
 
 import (
 	"fmt"
-	. "github.com/coderconquerer/go-login-app/internal/models"
+	. "github.com/coderconquerer/go-login-app/internal/TodoItem/models"
 	"github.com/gin-gonic/gin"
 	_ "gorm.io/driver/mysql"
 	"gorm.io/gorm"

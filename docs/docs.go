@@ -70,7 +70,7 @@ const docTemplate = `{
         },
         "/login": {
             "post": {
-                "description": "Authenticate a user with a username and password",
+                "description": "Authenticate a account with a username and password",
                 "consumes": [
                     "application/json"
                 ],
@@ -80,11 +80,11 @@ const docTemplate = `{
                 "tags": [
                     "Auth"
                 ],
-                "summary": "Login a user",
+                "summary": "Login a account",
                 "parameters": [
                     {
                         "description": "User credentials",
-                        "name": "user",
+                        "name": "account",
                         "in": "body",
                         "required": true,
                         "schema": {
@@ -134,7 +134,7 @@ const docTemplate = `{
         },
         "/register": {
             "post": {
-                "description": "Register a new user with a username and password",
+                "description": "Register a new account with a username and password",
                 "consumes": [
                     "application/json"
                 ],
@@ -144,11 +144,11 @@ const docTemplate = `{
                 "tags": [
                     "Auth"
                 ],
-                "summary": "Register a new user",
+                "summary": "Register a new account",
                 "parameters": [
                     {
                         "description": "User credentials",
-                        "name": "user",
+                        "name": "account",
                         "in": "body",
                         "required": true,
                         "schema": {

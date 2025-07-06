@@ -1,7 +1,7 @@
 package common
 
 import (
-	"github.com/coderconquerer/go-login-app/internal/models"
+	"github.com/coderconquerer/go-login-app/internal/TodoItem/models"
 	"time"
 )
 

@@ -77,8 +77,21 @@ func NewFullErrorResponse(err error, message string, log string, key string, sta
 		Status:  status,
 	}
 }
+
+func NewCustomErrorResponse(err error, message string, key string) *AppError {
+	return &AppError{
+		Message: message,
+		RootErr: err,
+		Key:     key,
+		Status:  http.StatusInternalServerError,
+	}
+}
 func NewUnauthorizedError(log string) *AppError {
 	return NewFullErrorResponse(ErrUnauthorized, ErrUnauthorizedMessage, log, KeyUnauthorized, http.StatusUnauthorized)
+}
+
+func NewUnauthorizedErrorCustom(err error, message string) *AppError {
+	return NewFullErrorResponse(err, message, err.Error(), KeyUnauthorized, http.StatusUnauthorized)
 }
 
 func NewForbiddenError(log string) *AppError {
@@ -139,4 +152,8 @@ func NewCannotDeleteEntity(entity string, err error) *AppError {
 func NewCannotUpdateEntity(entity string, err error) *AppError {
 	msg := fmt.Sprintf(ErrCannotUpdateFormat, entity)
 	return NewFullErrorResponse(err, msg, err.Error(), "ErrCannotUpdateFormat"+entity, http.StatusInternalServerError)
+}
+
+func NewInvalidUsernameOrPassword(msg string) *AppError {
+	return NewFullErrorResponse(errors.New(msg), msg, "", "Error_InvalidUsernameOrPassword", http.StatusBadRequest)
 }

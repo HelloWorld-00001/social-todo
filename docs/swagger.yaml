@@ -50,11 +50,11 @@ paths:
     post:
       consumes:
       - application/json
-      description: Authenticate a user with a username and password
+      description: Authenticate a account with a username and password
       parameters:
       - description: User credentials
         in: body
-        name: user
+        name: account
         required: true
         schema:
           $ref: '#/definitions/accountLogic.AccountDto'
@@ -85,18 +85,18 @@ paths:
             additionalProperties:
               type: string
             type: object
-      summary: Login a user
+      summary: Login a account
       tags:
       - Auth
   /register:
     post:
       consumes:
       - application/json
-      description: Register a new user with a username and password
+      description: Register a new account with a username and password
       parameters:
       - description: User credentials
         in: body
-        name: user
+        name: account
         required: true
         schema:
           $ref: '#/definitions/accountLogic.AccountDto'
@@ -121,7 +121,7 @@ paths:
             additionalProperties:
               type: string
             type: object
-      summary: Register a new user
+      summary: Register a new account
       tags:
       - Auth
 securityDefinitions:

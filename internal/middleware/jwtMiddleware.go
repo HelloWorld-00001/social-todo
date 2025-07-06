@@ -33,7 +33,7 @@ func ValidateJWT() gin.HandlerFunc {
 			return
 		}
 
-		// Optionally set user info in context
+		// Optionally set account info in context
 		claims, ok := token.Claims.(jwt.MapClaims)
 		if ok && token.Valid {
 			c.Set("username", claims["username"])

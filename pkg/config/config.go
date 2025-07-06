@@ -7,11 +7,20 @@ import (
 )
 
 type Config struct {
+	DbConfig  *DBConfig
+	JwtConfig *JWTConfig
+}
+
+type DBConfig struct {
 	DBUser     string
 	DBPassword string
 	DBName     string
 	DBHost     string
 	DBPort     string
+}
+type JWTConfig struct {
+	SecretKey string
+	Prefix    string
 }
 
 func Load() *Config {
@@ -21,10 +30,16 @@ func Load() *Config {
 	}
 
 	return &Config{
-		DBUser:     os.Getenv("DB_USER"),
-		DBPassword: os.Getenv("DB_PASSWORD"),
-		DBName:     os.Getenv("DB_NAME"),
-		DBHost:     os.Getenv("DB_HOST"),
-		DBPort:     os.Getenv("DB_PORT"),
+		DbConfig: &DBConfig{
+			DBUser:     os.Getenv("DB_USER"),
+			DBPassword: os.Getenv("DB_PASSWORD"),
+			DBName:     os.Getenv("DB_NAME"),
+			DBHost:     os.Getenv("DB_HOST"),
+			DBPort:     os.Getenv("DB_PORT"),
+		},
+		JwtConfig: &JWTConfig{
+			SecretKey: os.Getenv("JWT_SECRET_KEY"),
+			Prefix:    os.Getenv("JWT_PREFIX"),
+		},
 	}
 }

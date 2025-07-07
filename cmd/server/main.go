@@ -9,6 +9,9 @@ import (
 	AccountHandler "github.com/coderconquerer/go-login-app/internal/account/Handler"
 	accStorage "github.com/coderconquerer/go-login-app/internal/account/Storage"
 	"github.com/coderconquerer/go-login-app/internal/common"
+	"github.com/coderconquerer/go-login-app/internal/components/uploadProvider"
+	"github.com/coderconquerer/go-login-app/internal/file/BusinessUseCases"
+	"github.com/coderconquerer/go-login-app/internal/file/Handler"
 	todoBuc "github.com/coderconquerer/go-login-app/internal/todoItem/BusinessUseCases"
 	todoStorage "github.com/coderconquerer/go-login-app/internal/todoItem/Storage"
 	userBuc "github.com/coderconquerer/go-login-app/internal/user/BusinessUseCases"
@@ -36,7 +39,12 @@ func main() {
 		fmt.Println(cfg)
 		panic(err)
 	}
+	awsCfg := config.LoadAWSConfig()
 
+	// aws services
+	s3Provider := uploadProvider.NewS3ProviderWithConfig(awsCfg)
+	uploadBsn := BusinessUseCases.GetNewUploadFileLogicTemp(s3Provider)
+	uploadHandler := Handler.NewUploadHandler(uploadBsn)
 	// init services
 	tokenProvider := jwtProvider.GetNewJwtProvider(cfg.JwtConfig.Prefix, cfg.JwtConfig.SecretKey)
 	accStore := accStorage.GetNewMySQLConnection(database)
@@ -85,6 +93,7 @@ func main() {
 		v1.POST("/login", accountHandler.Login())
 		v1.POST("/register", accountHandler.RegisterAccount())
 		v1.POST("/disable", authAdmin, accountHandler.DisableAccount())
+		v1.POST("/upload", authUser, uploadHandler.UploadImage())
 
 	}
 	r.Use(sessions.Sessions("mysession", store))

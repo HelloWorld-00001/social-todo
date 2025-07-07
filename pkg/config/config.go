@@ -23,6 +23,14 @@ type JWTConfig struct {
 	Prefix    string
 }
 
+type AWSConfig struct {
+	SecretKey string
+	PublicKey string
+	Bucket    string
+	Region    string
+	Domain    string
+}
+
 func Load() *Config {
 	err := godotenv.Load()
 	if err != nil {
@@ -41,5 +49,20 @@ func Load() *Config {
 			SecretKey: os.Getenv("JWT_SECRET_KEY"),
 			Prefix:    os.Getenv("JWT_PREFIX"),
 		},
+	}
+}
+
+func LoadAWSConfig() *AWSConfig {
+	err := godotenv.Load()
+	if err != nil {
+		log.Println(".env file not found, relying on environment variables")
+	}
+
+	return &AWSConfig{
+		PublicKey: os.Getenv("AWS_PUBLIC_KEY"),
+		SecretKey: os.Getenv("AWS_SECRET_KEY"),
+		Region:    os.Getenv("AWS_REGION"),
+		Domain:    os.Getenv("AWS_DOMAIN"),
+		Bucket:    os.Getenv("AWS_BUCKET"),
 	}
 }

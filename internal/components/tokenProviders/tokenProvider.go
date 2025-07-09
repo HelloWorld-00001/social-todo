@@ -20,7 +20,7 @@ type Token interface {
 }
 
 func NewInValidTokenErr(err error) *common.AppError {
-	return common.NewBadRequestErrorResponse(
+	return common.NewBadRequestResponseWithError(
 		err,
 		"The token provided is invalid",
 		err.Error(),

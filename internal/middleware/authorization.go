@@ -15,7 +15,7 @@ type AuthorizationStore interface {
 }
 
 func ErrorWrongAuthHeader(err error) *common.AppError {
-	return common.NewBadRequestErrorResponse(err, "Wrong authorization header", err.Error())
+	return common.NewBadRequestResponseWithError(err, "Wrong authorization header", err.Error())
 }
 
 func extractTokenHeader(authHeader string) (string, error) {

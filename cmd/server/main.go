@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"github.com/coderconquerer/go-login-app/configs"
 	"github.com/coderconquerer/go-login-app/docs"
 	_ "github.com/coderconquerer/go-login-app/docs"
 	TodoHandler "github.com/coderconquerer/go-login-app/internal/TodoItem/Handler"
@@ -20,7 +21,6 @@ import (
 
 	"github.com/coderconquerer/go-login-app/internal/components/tokenProviders/jwtProvider"
 	"github.com/coderconquerer/go-login-app/internal/middleware"
-	"github.com/coderconquerer/go-login-app/pkg/config"
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-contrib/sessions/cookie"
 	"github.com/gin-gonic/gin"
@@ -32,19 +32,15 @@ import (
 // @in header
 // @name Authorization
 func main() {
-	cfg := config.Load()
+	cfg := configs.Load()
 	database, err := todoStorage.GetMySQLConnection(cfg.DbConfig)
 	if err != nil {
 		fmt.Println("Cannot connect to database")
 		fmt.Println(cfg)
 		panic(err)
 	}
-	awsCfg := config.LoadAWSConfig()
+	awsCfg := configs.LoadAWSConfig()
 
-	// aws services
-	s3Provider := uploadProvider.NewS3ProviderWithConfig(awsCfg)
-	uploadBsn := BusinessUseCases.GetNewUploadFileLogicTemp(s3Provider)
-	uploadHandler := Handler.NewUploadHandler(uploadBsn)
 	// init services
 	tokenProvider := jwtProvider.GetNewJwtProvider(cfg.JwtConfig.Prefix, cfg.JwtConfig.SecretKey)
 	accStore := accStorage.GetNewMySQLConnection(database)
@@ -66,6 +62,10 @@ func main() {
 	getUserProfileBz := userBuc.GetNewFindUserLogic(userStore)
 	userHandler := userHandler.NewUserHandler(getUserProfileBz)
 
+	// aws services
+	s3Provider := uploadProvider.NewS3ProviderWithConfig(awsCfg)
+	uploadBsn := BusinessUseCases.GetNewUploadFileLogic(todoStore, userStore, s3Provider)
+	uploadHandler := Handler.NewUploadHandler(uploadBsn)
 	swaggerSetup()
 
 	r := gin.Default()

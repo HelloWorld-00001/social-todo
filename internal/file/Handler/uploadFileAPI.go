@@ -2,11 +2,16 @@ package Handler
 
 import (
 	"errors"
+	"fmt"
 	"github.com/coderconquerer/go-login-app/internal/common"
 	"github.com/gin-gonic/gin"
 	"log"
 	"mime/multipart"
 	"net/http"
+	"path/filepath"
+	"strconv"
+	"strings"
+	"time"
 )
 
 func (uh *UploadHandler) UploadImage() gin.HandlerFunc {
@@ -14,7 +19,7 @@ func (uh *UploadHandler) UploadImage() gin.HandlerFunc {
 		// Parse multipart form (optional: set memory limit)
 		file, err := c.FormFile("file")
 		if err != nil {
-			c.JSON(http.StatusBadRequest, common.NewBadRequestErrorResponse(errors.New("missing upload file"), "file is quire", ""))
+			c.JSON(http.StatusBadRequest, common.NewBadRequestResponseWithError(errors.New("missing upload file"), "file is quire", ""))
 			return
 		}
 
@@ -39,11 +44,27 @@ func (uh *UploadHandler) UploadImage() gin.HandlerFunc {
 		}
 
 		// Optional: clean or generate file name
-		destination := "social-todo-list/" + file.Filename
+		ext := strings.ToLower(filepath.Ext(file.Filename)) // Safe: handles case and ensures lowercase
+		newFileName := fmt.Sprintf("%d%s", time.Now().UnixNano(), ext)
+		destination := "social-todo-list/" + newFileName
+
 		// Optionally add UUID, timestamp, etc.
+		// Get other form fields
+		ownerStr := c.PostForm("owner")
+		ownerIdStr := c.PostForm("owner_id")
+
+		if ownerStr == "" || ownerIdStr == "" {
+			c.JSON(http.StatusBadRequest, common.NewBadRequestResponse("owner and owner_id are required"))
+			return
+		}
+		ownerId, err := strconv.Atoi(ownerIdStr)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, common.NewBadRequestResponseWithError(err, "invalid owner_id", "owner_id must be integer"))
+			return
+		}
 
 		// Upload to S3
-		img, err2 := uh.UploadBz.UploadImage(c, dataBytes, destination)
+		img, err2 := uh.UploadBz.UploadImage(c, dataBytes, destination, common.EntityFromString(ownerStr), ownerId)
 		if err2 != nil {
 			c.JSON(http.StatusInternalServerError, common.NewInternalSeverErrorResponse(err2, "cannot upload image to S3 cloud", err2.Error()))
 			return

@@ -2,8 +2,8 @@ package Storage
 
 import (
 	"fmt"
+	"github.com/coderconquerer/go-login-app/configs"
 	"github.com/coderconquerer/go-login-app/internal/common"
-	"github.com/coderconquerer/go-login-app/pkg/config"
 	_ "github.com/go-sql-driver/mysql"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
@@ -13,7 +13,7 @@ type MySQLConnection struct {
 	conn *gorm.DB
 }
 
-func GetMySQLConnection(cfg *config.DBConfig) (*gorm.DB, error) {
+func GetMySQLConnection(cfg *configs.DBConfig) (*gorm.DB, error) {
 	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?parseTime=true",
 		cfg.DBUser,
 		cfg.DBPassword,

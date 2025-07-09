@@ -5,8 +5,8 @@ import (
 	"context"
 	"fmt"
 	"github.com/aws/aws-sdk-go/aws/credentials"
+	"github.com/coderconquerer/go-login-app/configs"
 	"github.com/coderconquerer/go-login-app/internal/common"
-	"github.com/coderconquerer/go-login-app/pkg/config"
 	"log"
 	"net/http"
 
@@ -24,7 +24,7 @@ type S3Provider struct {
 	Session    *session.Session
 }
 
-func NewS3ProviderWithConfig(config *config.AWSConfig) *S3Provider {
+func NewS3ProviderWithConfig(config *configs.AWSConfig) *S3Provider {
 	provider := &S3Provider{
 		BucketName: config.Bucket,
 		Region:     config.Region,

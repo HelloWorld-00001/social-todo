@@ -8,12 +8,18 @@ import (
 
 type Image struct {
 	Url       string `json:"url"`
-	Width     uint   `json:"width,omitempty"`
-	Height    uint   `json:"height,omitempty"`
-	FileSize  string `json:"file_size,omitempty"`
+	Width     int    `json:"width,omitempty"`
+	Height    int    `json:"height,omitempty"`
+	FileSize  int    `json:"file_size,omitempty"`
 	FileName  string `json:"file_name,omitempty"`
 	IsDelete  bool   `json:"is_delete,omitempty"`
 	CloudName string `json:"cloud_name,omitempty"`
+}
+
+type UploadImage struct {
+	Img   []byte `json:"image"`
+	Owner Entity `json:"owner"`
+	Id    int    `json:"owner_id"`
 }
 
 // Value converts Image to JSON for SQL storage
@@ -37,7 +43,7 @@ func (img *Image) Scan(value interface{}) error {
 	case []byte:
 		data = v
 	default:
-		return NewBadRequestErrorResponse(errors.New("invalid type for Image Scan"), "cannot process invalid image", "")
+		return NewBadRequestResponseWithError(errors.New("invalid type for Image Scan"), "cannot process invalid image", "")
 	}
 
 	return json.Unmarshal(data, img)
@@ -68,7 +74,7 @@ func (imgs *Images) Scan(value interface{}) error {
 	case []byte:
 		data = v
 	default:
-		return NewBadRequestErrorResponse(errors.New("invalid type for Image Scan"), "cannot process invalid image", "")
+		return NewBadRequestResponseWithError(errors.New("invalid type for Image Scan"), "cannot process invalid image", "")
 	}
 
 	return json.Unmarshal(data, imgs)

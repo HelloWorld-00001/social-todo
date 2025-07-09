@@ -122,8 +122,12 @@ func NewNotFoundErrorResponse(err error) *AppError {
 	return NewFullErrorResponse(err, ErrRecordNotFoundMessage, err.Error(), KeyNotFound, http.StatusNotFound)
 }
 
-func NewBadRequestErrorResponse(err error, message string, log string) *AppError {
+func NewBadRequestResponseWithError(err error, message string, log string) *AppError {
 	return NewFullErrorResponse(err, message, log, KeyInvalidInput, http.StatusBadRequest)
+}
+
+func NewBadRequestResponse(message string) *AppError {
+	return NewFullErrorResponse(errors.New(message), message, "", KeyInvalidInput, http.StatusBadRequest)
 }
 
 func NewInternalSeverErrorResponse(err error, message string, log string) *AppError {

@@ -1,7 +1,6 @@
 package common
 
 import (
-	"github.com/coderconquerer/go-login-app/internal/TodoItem/models"
 	"time"
 )
 
@@ -18,7 +17,4 @@ type Filter struct {
 	CreateBy    int        `gorm:"column:Create_By" json:"create_by"`
 	Assignee    int        `gorm:"column:Assignee" json:"assignee"`
 	Title       string     `gorm:"column:Title" json:"title"`
-
-	Creator  *models.User `gorm:"foreignKey:CreateBy;references:UserID" json:"creator,omitempty"`
-	Assigned *models.User `gorm:"foreignKey:Assignee;references:UserID" json:"assigned,omitempty"`
 }

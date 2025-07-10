@@ -1,6 +1,7 @@
 package models
 
 import (
+	"github.com/coderconquerer/go-login-app/internal/common"
 	"time"
 )
 
@@ -13,7 +14,7 @@ var (
 )
 
 type Todo struct {
-	TodoID      int        `gorm:"column:Id;primaryKey;autoIncrement" json:"id"`
+	common.SqlModel
 	Description string     `gorm:"column:Description;type:text;" json:"description"`
 	Status      string     `gorm:"column:Status" json:"status"`
 	UpdateTime  time.Time  `gorm:"column:UpdateTime" json:"update_time"`
@@ -28,15 +29,12 @@ type Todo struct {
 	Assignee    int        `gorm:"column:Assignee" json:"assignee"`
 	Title       string     `gorm:"column:Title" json:"title"`
 
-	Creator   *User      `gorm:"foreignKey:CreateBy;references:UserID" json:"creator,omitempty"`
-	Assigned  *User      `gorm:"foreignKey:Assignee;references:UserID" json:"assigned,omitempty"`
-	Metadata  []Metadata `gorm:"foreignKey:TodoID" json:"metadata,omitempty"`
-	Comments  []Comment  `gorm:"foreignKey:TodoID" json:"comments,omitempty"`
-	Reactions []Reaction `gorm:"foreignKey:TodoID" json:"reactions,omitempty"`
+	//Creator  *User `gorm:"foreignKey:CreateBy;references:UserId" json:"creator,omitempty"`
+	//Assigned *User `gorm:"foreignKey:Assignee;references:UserId" json:"assigned,omitempty"`
 }
 
 type UpdateTodo struct {
-	TodoID      int       `gorm:"column:Id;primaryKey;autoIncrement" json:"-"`
+	common.SqlModel
 	Description string    `gorm:"column:Description;type:text;" json:"description"`
 	Status      string    `gorm:"column:Status" json:"status"`
 	UpdateTime  time.Time `gorm:"column:UpdateTime" json:"-"`
@@ -60,4 +58,8 @@ type TodoCreation struct {
 	Workspace   string    `gorm:"column:workspace" json:"workspace"`
 	Assignee    int       `gorm:"column:Assignee" json:"assignee"`
 	Title       string    `gorm:"column:Title" json:"title"`
+}
+
+func (t *Todo) MarkupId() {
+	t.MakeMarkupId(common.TodoEntity, 1)
 }

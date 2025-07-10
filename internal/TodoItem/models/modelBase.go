@@ -26,8 +26,8 @@ type User struct {
 	AvatarMetadata *Metadata  `gorm:"foreignKey:Avatar;references:MetadataID" json:"avatar_metadata,omitempty"`
 	CreatedTodos   []Todo     `gorm:"foreignKey:CreateBy" json:"created_todos,omitempty"`
 	AssignedTodos  []Todo     `gorm:"foreignKey:Assignee" json:"assigned_todos,omitempty"`
-	Comments       []Comment  `gorm:"foreignKey:UserID" json:"comments,omitempty"`
-	Reactions      []Reaction `gorm:"foreignKey:UserID" json:"reactions,omitempty"`
+	Comments       []Comment  `gorm:"foreignKey:Id" json:"comments,omitempty"`
+	Reactions      []Reaction `gorm:"foreignKey:Id" json:"reactions,omitempty"`
 }
 
 func (Metadata) TableName() string {
@@ -44,7 +44,7 @@ type Metadata struct {
 	URL           string `gorm:"column:URL" json:"url"`
 	TodoID        *int   `gorm:"column:Todo_id" json:"todo_id,omitempty"`
 
-	Todo *Todo `gorm:"foreignKey:TodoID" json:"todo,omitempty"`
+	Todo *Todo `gorm:"foreignKey:Id" json:"todo,omitempty"`
 }
 
 func (Comment) TableName() string {
@@ -56,8 +56,8 @@ type Comment struct {
 	UserID  int    `gorm:"column:User_Id;primaryKey" json:"user_id"`
 	Content string `gorm:"column:Content;type:text;" json:"content"`
 
-	Todo *Todo `gorm:"foreignKey:TodoID" json:"todo,omitempty"`
-	User *User `gorm:"foreignKey:UserID" json:"account,omitempty"`
+	Todo *Todo `gorm:"foreignKey:Id" json:"todo,omitempty"`
+	User *User `gorm:"foreignKey:Id" json:"account,omitempty"`
 }
 
 func (Reaction) TableName() string {
@@ -69,6 +69,6 @@ type Reaction struct {
 	UserID int    `gorm:"column:User_Id;primaryKey" json:"user_id"`
 	React  string `gorm:"column:React;type:enum('Like','Dislike','Love','Angry','Wow')" json:"react"`
 
-	Todo *Todo `gorm:"foreignKey:TodoID" json:"todo,omitempty"`
-	User *User `gorm:"foreignKey:UserID" json:"account,omitempty"`
+	Todo *Todo `gorm:"foreignKey:Id" json:"todo,omitempty"`
+	User *User `gorm:"foreignKey:Id" json:"account,omitempty"`
 }

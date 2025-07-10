@@ -23,6 +23,9 @@ func (th *TodoHandler) GetToDoList() gin.HandlerFunc {
 			return
 		}
 
+		for i := range result {
+			result[i].MarkupId() // ✅ modifies original struct
+		}
 		c.JSON(http.StatusOK, common.StandardResponseWithoutFilter(result, pagination))
 	}
 }

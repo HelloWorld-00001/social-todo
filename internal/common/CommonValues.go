@@ -18,6 +18,10 @@ const (
 )
 
 const (
+	DbMainName = "mysql"
+)
+
+const (
 	User = "User"
 	Todo = "Todo"
 )

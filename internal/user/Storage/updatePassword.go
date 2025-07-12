@@ -1,8 +1,8 @@
 package Storage
 
 import (
-	"github.com/coderconquerer/go-login-app/internal/TodoItem/models"
 	"github.com/coderconquerer/go-login-app/internal/common"
+	"github.com/coderconquerer/go-login-app/internal/todoItem/models"
 	"github.com/gin-gonic/gin"
 )
 

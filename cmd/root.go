@@ -4,23 +4,25 @@ import (
 	"fmt"
 	goService "github.com/200Lab-Education/go-sdk"
 	"github.com/200Lab-Education/go-sdk/plugin/storage/sdkgorm"
+	"github.com/coderconquerer/go-login-app/common"
 	"github.com/coderconquerer/go-login-app/configs"
 	"github.com/coderconquerer/go-login-app/docs"
-	accBuc "github.com/coderconquerer/go-login-app/internal/account/BusinessUseCases"
-	accountHdl "github.com/coderconquerer/go-login-app/internal/account/Handler"
-	accStorage "github.com/coderconquerer/go-login-app/internal/account/Storage"
-	"github.com/coderconquerer/go-login-app/internal/common"
-	"github.com/coderconquerer/go-login-app/internal/components/tokenProviders/jwtProvider"
-	"github.com/coderconquerer/go-login-app/internal/components/uploadProvider"
-	"github.com/coderconquerer/go-login-app/internal/file/BusinessUseCases"
-	"github.com/coderconquerer/go-login-app/internal/file/Handler"
-	"github.com/coderconquerer/go-login-app/internal/middleware"
-	todoBuc "github.com/coderconquerer/go-login-app/internal/todoItem/BusinessUseCases"
-	todoHdl "github.com/coderconquerer/go-login-app/internal/todoItem/Handler"
-	todoStorage "github.com/coderconquerer/go-login-app/internal/todoItem/Storage"
-	userBuc "github.com/coderconquerer/go-login-app/internal/user/BusinessUseCases"
-	userHdl "github.com/coderconquerer/go-login-app/internal/user/Handler"
-	userStorage "github.com/coderconquerer/go-login-app/internal/user/Storage"
+	"github.com/coderconquerer/go-login-app/middleware"
+	accBuc "github.com/coderconquerer/go-login-app/module/account/BusinessUseCases"
+	accountHdl "github.com/coderconquerer/go-login-app/module/account/Handler"
+	accStorage "github.com/coderconquerer/go-login-app/module/account/Storage"
+	"github.com/coderconquerer/go-login-app/module/file/BusinessUseCases"
+	"github.com/coderconquerer/go-login-app/module/file/Handler"
+	todoBuc "github.com/coderconquerer/go-login-app/module/todoItem/BusinessUseCases"
+	todoHdl "github.com/coderconquerer/go-login-app/module/todoItem/Handler"
+	todoStorage "github.com/coderconquerer/go-login-app/module/todoItem/Storage"
+	userBuc "github.com/coderconquerer/go-login-app/module/user/BusinessUseCases"
+	userHdl "github.com/coderconquerer/go-login-app/module/user/Handler"
+	userStorage "github.com/coderconquerer/go-login-app/module/user/Storage"
+	tokenPlugin "github.com/coderconquerer/go-login-app/plugin/tokenProviders"
+	"github.com/coderconquerer/go-login-app/plugin/tokenProviders/jwtProvider"
+	uploadPlugin "github.com/coderconquerer/go-login-app/plugin/uploadProvider"
+	"github.com/coderconquerer/go-login-app/plugin/uploadProvider/s3provider"
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-contrib/sessions/cookie"
 	"github.com/gin-gonic/gin"
@@ -31,11 +33,18 @@ import (
 	"os"
 )
 
+var (
+	cfg    = configs.Load()
+	awsCfg = configs.LoadAWSConfig()
+)
+
 func NewServices() goService.Service {
 	service := goService.New(
 		goService.WithName("social-todo-app"),
 		goService.WithVersion("1.0.0"),
 		goService.WithInitRunnable(sdkgorm.NewGormDB("main-db", common.DbMainName)),
+		goService.WithInitRunnable(jwtProvider.GetNewJwtProvider(cfg.JwtConfig.JwtPrefix, cfg.JwtConfig.SecretKey)),
+		goService.WithInitRunnable(s3provider.NewS3ProviderWithConfig(awsCfg)),
 	)
 
 	return service
@@ -53,12 +62,11 @@ var rootCmd = &cobra.Command{
 		}
 
 		service.HTTPServer().AddHandler(func(engine *gin.Engine) {
-			cfg := configs.Load()
-			awsCfg := configs.LoadAWSConfig()
 			database := service.MustGet(common.DbMainName).(*gorm.DB)
+			tokenProvider := service.MustGet(cfg.JwtConfig.JwtPrefix).(tokenPlugin.TokenProvider)
+			s3Provider := service.MustGet(awsCfg.S3Prefix).(uploadPlugin.UploadProvider)
 
 			// init services
-			tokenProvider := jwtProvider.GetNewJwtProvider(cfg.JwtConfig.Prefix, cfg.JwtConfig.SecretKey)
 			accStore := accStorage.GetNewMySQLConnection(database)
 			registerBsn := accBuc.GetNewRegisterAccountLogic(accStore)
 			loginBsn := accBuc.GetNewLoginLogic(accStore, tokenProvider, 60*60*24*30)
@@ -79,7 +87,6 @@ var rootCmd = &cobra.Command{
 			userHandler := userHdl.NewUserHandler(getUserProfileBz)
 
 			// aws services
-			s3Provider := uploadProvider.NewS3ProviderWithConfig(awsCfg)
 			uploadBsn := BusinessUseCases.GetNewUploadFileLogic(todoStore, userStore, s3Provider)
 			uploadHandler := Handler.NewUploadHandler(uploadBsn)
 			swaggerSetup()

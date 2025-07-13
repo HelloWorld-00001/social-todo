@@ -20,10 +20,11 @@ type DBConfig struct {
 }
 type JWTConfig struct {
 	SecretKey string
-	Prefix    string
+	JwtPrefix string
 }
 
 type AWSConfig struct {
+	S3Prefix  string
 	SecretKey string
 	PublicKey string
 	Bucket    string
@@ -31,12 +32,15 @@ type AWSConfig struct {
 	Domain    string
 }
 
-func Load() *Config {
-	err := godotenv.Load()
+func InitEnv() {
+	err := godotenv.Load("../../.env") // adjust path relative to cmd/server/main.go
 	if err != nil {
 		log.Println(".env file not found, relying on environment variables")
 	}
+}
 
+func Load() *Config {
+	InitEnv()
 	return &Config{
 		DbConfig: &DBConfig{
 			DBUser:     os.Getenv("DB_USER"),
@@ -47,22 +51,24 @@ func Load() *Config {
 		},
 		JwtConfig: &JWTConfig{
 			SecretKey: os.Getenv("JWT_SECRET_KEY"),
-			Prefix:    os.Getenv("JWT_PREFIX"),
+			JwtPrefix: os.Getenv("JWT_PREFIX"),
 		},
 	}
 }
 
 func LoadAWSConfig() *AWSConfig {
+	InitEnv()
 	err := godotenv.Load()
 	if err != nil {
 		log.Println(".env file not found, relying on environment variables")
 	}
 
 	return &AWSConfig{
-		PublicKey: os.Getenv("AWS_PUBLIC_KEY"),
-		SecretKey: os.Getenv("AWS_SECRET_KEY"),
-		Region:    os.Getenv("AWS_REGION"),
-		Domain:    os.Getenv("AWS_DOMAIN"),
-		Bucket:    os.Getenv("AWS_BUCKET"),
+		S3Prefix:  os.Getenv("AWS_S3_PREFIX"),
+		PublicKey: os.Getenv("AWS_S3_PUBLIC_KEY"),
+		SecretKey: os.Getenv("AWS_S3_SECRET_KEY"),
+		Region:    os.Getenv("AWS_S3_REGION"),
+		Domain:    os.Getenv("AWS_S3_DOMAIN"),
+		Bucket:    os.Getenv("AWS_S3_BUCKET"),
 	}
 }

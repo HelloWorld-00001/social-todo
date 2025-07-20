@@ -7,6 +7,14 @@ type Pagination struct {
 }
 
 func (p *Pagination) Process() {
+	if p.Limit <= 0 {
+		p.Limit = 5
+	}
+
+	if p.Limit > 50 {
+		p.Limit = 50
+	}
+	
 	if p.Page < 1 {
 		p.Page = 1
 	}

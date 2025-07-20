@@ -2,8 +2,8 @@ package jwtProvider
 
 import (
 	"flag"
-	"github.com/coderconquerer/go-login-app/common"
-	tokenProviders "github.com/coderconquerer/go-login-app/plugin/tokenProviders"
+	"github.com/coderconquerer/social-todo/common"
+	tokenProviders "github.com/coderconquerer/social-todo/plugin/tokenProviders"
 	"github.com/golang-jwt/jwt/v5"
 	"time"
 )
@@ -90,8 +90,9 @@ func (j *JwtProvider) GenerateToken(data tokenProviders.TokenPayload, expiry int
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
 		},
 		MyPayload: common.TokenPayload{
-			UserId: data.GetUserId(),
-			Role:   data.GetRole(),
+			AccountId: data.GetAccountId(),
+			UserId:    data.GetUserId(),
+			Role:      data.GetRole(),
 		},
 	}
 

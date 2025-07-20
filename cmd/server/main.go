@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/coderconquerer/go-login-app/cmd"
+	"github.com/coderconquerer/social-todo/cmd"
 )
 
 // @securityDefinitions.apikey BearerAuth

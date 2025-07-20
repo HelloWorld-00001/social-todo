@@ -2,8 +2,8 @@ package Storage
 
 import (
 	"fmt"
-	"github.com/coderconquerer/go-login-app/common"
-	"github.com/coderconquerer/go-login-app/configs"
+	"github.com/coderconquerer/social-todo/common"
+	"github.com/coderconquerer/social-todo/configs"
 	_ "github.com/go-sql-driver/mysql"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"

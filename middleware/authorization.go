@@ -2,9 +2,9 @@ package middleware
 
 import (
 	"errors"
-	common2 "github.com/coderconquerer/go-login-app/common"
-	"github.com/coderconquerer/go-login-app/module/account/models"
-	tokenProviders "github.com/coderconquerer/go-login-app/plugin/tokenProviders"
+	common2 "github.com/coderconquerer/social-todo/common"
+	"github.com/coderconquerer/social-todo/module/account/models"
+	tokenProviders "github.com/coderconquerer/social-todo/plugin/tokenProviders"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"strings"
@@ -44,12 +44,17 @@ func RequireAuth(provider tokenProviders.TokenProvider, store AuthorizationStore
 		}
 
 		condition := map[string]interface{}{
-			"Id": payload.GetUserId(),
+			"Id": payload.GetAccountId(),
 		}
 
 		account, err := store.FindAccount(c, condition)
 		if err != nil || account == nil {
 			c.AbortWithStatusJSON(http.StatusUnauthorized, common2.NewUnauthorizedErrorCustom(err, "Account not found"))
+			return
+		}
+
+		if account.User == nil {
+			c.AbortWithStatusJSON(http.StatusUnauthorized, common2.NewUnauthorizedErrorCustom(err, "Cannot get user information"))
 			return
 		}
 
@@ -70,7 +75,7 @@ func RequireAuth(provider tokenProviders.TokenProvider, store AuthorizationStore
 
 		// todo: check disabled account
 		// Save the account info in context
-		c.Set(common2.AccountContextKey, account)
+		c.Set(common2.CurrentUserContextKey, account.User)
 		c.Next()
 	}
 }

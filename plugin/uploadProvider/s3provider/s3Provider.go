@@ -6,8 +6,8 @@ import (
 	"flag"
 	"fmt"
 	"github.com/aws/aws-sdk-go/aws/credentials"
-	"github.com/coderconquerer/go-login-app/common"
-	"github.com/coderconquerer/go-login-app/configs"
+	"github.com/coderconquerer/social-todo/common"
+	"github.com/coderconquerer/social-todo/configs"
 	"log"
 	"net/http"
 

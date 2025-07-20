@@ -2,8 +2,9 @@ package Storage
 
 import (
 	"errors"
-	"github.com/coderconquerer/go-login-app/common"
-	"github.com/coderconquerer/go-login-app/module/account/models"
+	"github.com/coderconquerer/social-todo/common"
+	"github.com/coderconquerer/social-todo/module/account/models"
+	models2 "github.com/coderconquerer/social-todo/module/user/models"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 )
@@ -12,7 +13,7 @@ func (db *MySQLConnection) FindAccountByUsername(c *gin.Context, username string
 	// filter deleted first
 	var account models.Account
 	dbc := db.conn.Table(models.Account{}.TableName())
-	if err := dbc.Where("Username = ?", username).First(&account).Error; err != nil {
+	if err := dbc.Preload(models2.User{}.TableName()).Where("Username = ?", username).Take(&account).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, err
 		}
@@ -26,7 +27,7 @@ func (db *MySQLConnection) FindAccount(c *gin.Context, conditions map[string]int
 	var account models.Account
 	dbc := db.conn.Table(models.Account{}.TableName())
 
-	if err := dbc.Where(conditions).First(&account).Error; err != nil {
+	if err := dbc.Preload(models2.User{}.TableName()).Where(conditions).Take(&account).Error; err != nil {
 		return nil, err
 	}
 

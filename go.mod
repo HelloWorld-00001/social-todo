@@ -1,4 +1,4 @@
-module github.com/coderconquerer/go-login-app
+module github.com/coderconquerer/social-todo
 
 go 1.23.0
 

@@ -2,9 +2,9 @@ package BusinessUseCases
 
 import (
 	"errors"
-	common2 "github.com/coderconquerer/go-login-app/common"
-	"github.com/coderconquerer/go-login-app/module/account/models"
-	tokenProviders "github.com/coderconquerer/go-login-app/plugin/tokenProviders"
+	common2 "github.com/coderconquerer/social-todo/common"
+	"github.com/coderconquerer/social-todo/module/account/models"
+	tokenProviders "github.com/coderconquerer/social-todo/plugin/tokenProviders"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 )
@@ -40,14 +40,18 @@ func (bz *LoginLogic) Login(c *gin.Context, acc models.AccountLogin) (tokenProvi
 			return nil, common2.NewDatabaseError(err)
 		}
 	}
+	if account.User == nil {
+		return nil, common2.NewInternalSeverErrorResponse(errors.New("error when fetching User"), "", "")
+	}
 
 	isCorrect := common2.ComparePasswordWithSalt(acc.Password, account.Salt, account.Password)
 	if !isCorrect {
 		return nil, common2.NewInvalidUsernameOrPassword("Incorrect username or password")
 	}
 	payload := &common2.TokenPayload{
-		UserId: account.AccountID,
-		Role:   account.Role,
+		AccountId: account.AccountID,
+		UserId:    account.User.Id,
+		Role:      account.Role,
 	}
 
 	accessToken, err := bz.tokenProvider.GenerateToken(payload, bz.expiry)

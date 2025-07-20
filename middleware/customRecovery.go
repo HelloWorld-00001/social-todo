@@ -2,7 +2,7 @@ package middleware
 
 import (
 	"errors"
-	"github.com/coderconquerer/go-login-app/common"
+	"github.com/coderconquerer/social-todo/common"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm/utils"
 	"log"

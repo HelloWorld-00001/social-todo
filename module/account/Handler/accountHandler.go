@@ -1,6 +1,6 @@
 package Handler
 
-import "github.com/coderconquerer/go-login-app/module/account/BusinessUseCases"
+import "github.com/coderconquerer/social-todo/module/account/BusinessUseCases"
 
 type AccountHandler struct {
 	LoginLogic    *BusinessUseCases.LoginLogic

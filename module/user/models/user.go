@@ -1,7 +1,7 @@
 package models
 
 import (
-	common2 "github.com/coderconquerer/go-login-app/common"
+	common "github.com/coderconquerer/social-todo/common"
 )
 
 func (User) TableName() string {
@@ -9,14 +9,29 @@ func (User) TableName() string {
 }
 
 type User struct {
-	common2.SqlModel
-	Email    string         `gorm:"column:Email;unique" json:"email"`
-	Phone    string         `gorm:"column:Phone;unique" json:"phone"`
-	Username string         `gorm:"column:Username;unique" json:"username"`
-	Name     string         `gorm:"column:Name" json:"name"`
-	Avatar   *common2.Image `gorm:"column:avatar" json:"avatar"`
+	common.SqlModel
+	Email    string        `gorm:"column:Email;unique" json:"email"`
+	Phone    string        `gorm:"column:Phone;unique" json:"phone"`
+	Username string        `gorm:"column:Username;unique" json:"username"`
+	Name     string        `gorm:"column:Name" json:"name"`
+	Avatar   *common.Image `gorm:"column:avatar" json:"avatar"`
+}
+
+func (SimpleUser) TableName() string {
+	return "User"
+}
+
+type SimpleUser struct {
+	common.SqlModel
+	Email string `gorm:"column:Email;unique" json:"email"`
+	Name  string `gorm:"column:Name" json:"name"`
+	React string `gorm:"-" json:"react"`
 }
 
 func (u *User) MarkupId() {
-	u.MakeMarkupId(common2.UserEntity, 1)
+	u.MakeMarkupId(common.UserEntity, 1)
+}
+
+func (u *SimpleUser) MarkupId() {
+	u.MakeMarkupId(common.UserEntity, 1)
 }

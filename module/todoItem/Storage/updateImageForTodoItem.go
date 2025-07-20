@@ -2,7 +2,7 @@ package Storage
 
 import (
 	"database/sql/driver"
-	"github.com/coderconquerer/go-login-app/module/todoItem/models"
+	"github.com/coderconquerer/social-todo/module/todoItem/models"
 	"github.com/gin-gonic/gin"
 )
 

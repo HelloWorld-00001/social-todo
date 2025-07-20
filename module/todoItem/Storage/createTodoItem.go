@@ -1,7 +1,7 @@
 package Storage
 
 import (
-	"github.com/coderconquerer/go-login-app/module/todoItem/models"
+	"github.com/coderconquerer/social-todo/module/todoItem/models"
 	"github.com/gin-gonic/gin"
 	"time"
 )

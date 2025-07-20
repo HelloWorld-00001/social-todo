@@ -2,7 +2,7 @@ package Handler
 
 import (
 	"errors"
-	common2 "github.com/coderconquerer/go-login-app/common"
+	common2 "github.com/coderconquerer/social-todo/common"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"strconv"

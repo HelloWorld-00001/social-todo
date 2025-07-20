@@ -4,25 +4,28 @@ import (
 	"fmt"
 	goService "github.com/200Lab-Education/go-sdk"
 	"github.com/200Lab-Education/go-sdk/plugin/storage/sdkgorm"
-	"github.com/coderconquerer/go-login-app/common"
-	"github.com/coderconquerer/go-login-app/configs"
-	"github.com/coderconquerer/go-login-app/docs"
-	"github.com/coderconquerer/go-login-app/middleware"
-	accBuc "github.com/coderconquerer/go-login-app/module/account/BusinessUseCases"
-	accountHdl "github.com/coderconquerer/go-login-app/module/account/Handler"
-	accStorage "github.com/coderconquerer/go-login-app/module/account/Storage"
-	"github.com/coderconquerer/go-login-app/module/file/BusinessUseCases"
-	"github.com/coderconquerer/go-login-app/module/file/Handler"
-	todoBuc "github.com/coderconquerer/go-login-app/module/todoItem/BusinessUseCases"
-	todoHdl "github.com/coderconquerer/go-login-app/module/todoItem/Handler"
-	todoStorage "github.com/coderconquerer/go-login-app/module/todoItem/Storage"
-	userBuc "github.com/coderconquerer/go-login-app/module/user/BusinessUseCases"
-	userHdl "github.com/coderconquerer/go-login-app/module/user/Handler"
-	userStorage "github.com/coderconquerer/go-login-app/module/user/Storage"
-	tokenPlugin "github.com/coderconquerer/go-login-app/plugin/tokenProviders"
-	"github.com/coderconquerer/go-login-app/plugin/tokenProviders/jwtProvider"
-	uploadPlugin "github.com/coderconquerer/go-login-app/plugin/uploadProvider"
-	"github.com/coderconquerer/go-login-app/plugin/uploadProvider/s3provider"
+	"github.com/coderconquerer/social-todo/common"
+	"github.com/coderconquerer/social-todo/configs"
+	"github.com/coderconquerer/social-todo/docs"
+	"github.com/coderconquerer/social-todo/middleware"
+	accBuc "github.com/coderconquerer/social-todo/module/account/BusinessUseCases"
+	accountHdl "github.com/coderconquerer/social-todo/module/account/Handler"
+	accStorage "github.com/coderconquerer/social-todo/module/account/Storage"
+	"github.com/coderconquerer/social-todo/module/file/BusinessUseCases"
+	"github.com/coderconquerer/social-todo/module/file/Handler"
+	todoBuc "github.com/coderconquerer/social-todo/module/todoItem/BusinessUseCases"
+	todoHdl "github.com/coderconquerer/social-todo/module/todoItem/Handler"
+	todoStorage "github.com/coderconquerer/social-todo/module/todoItem/Storage"
+	userBuc "github.com/coderconquerer/social-todo/module/user/BusinessUseCases"
+	userHdl "github.com/coderconquerer/social-todo/module/user/Handler"
+	userStorage "github.com/coderconquerer/social-todo/module/user/Storage"
+	BusinessUseCases2 "github.com/coderconquerer/social-todo/module/userReactItem/BusinessUseCases"
+	Handler2 "github.com/coderconquerer/social-todo/module/userReactItem/Handler"
+	"github.com/coderconquerer/social-todo/module/userReactItem/Storage"
+	tokenPlugin "github.com/coderconquerer/social-todo/plugin/tokenProviders"
+	"github.com/coderconquerer/social-todo/plugin/tokenProviders/jwtProvider"
+	uploadPlugin "github.com/coderconquerer/social-todo/plugin/uploadProvider"
+	"github.com/coderconquerer/social-todo/plugin/uploadProvider/s3provider"
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-contrib/sessions/cookie"
 	"github.com/gin-gonic/gin"
@@ -86,6 +89,13 @@ var rootCmd = &cobra.Command{
 			getUserProfileBz := userBuc.GetNewFindUserLogic(userStore)
 			userHandler := userHdl.NewUserHandler(getUserProfileBz)
 
+			// reaction service
+			reactionStore := Storage.GetNewMySQLConnection(database)
+			reactBz := BusinessUseCases2.GetNewReactTodoItemLogic(reactionStore)
+			unReactBz := BusinessUseCases2.GetNewUnreactTodoItemLogic(reactionStore)
+			listRUBz := BusinessUseCases2.GetNewGetListReactedUsersLogic(reactionStore)
+			reactHandler := Handler2.NewReactionHandler(reactBz, unReactBz, listRUBz)
+
 			// aws services
 			uploadBsn := BusinessUseCases.GetNewUploadFileLogic(todoStore, userStore, s3Provider)
 			uploadHandler := Handler.NewUploadHandler(uploadBsn)
@@ -110,6 +120,14 @@ var rootCmd = &cobra.Command{
 					todoRoutes.DELETE("/:id", authUser, todoHandler.DeleteTodoItem())
 					todoRoutes.POST("/", authUser, todoHandler.CreateTodoItem())
 				}
+
+				react := v1.Group("/react")
+				{
+					react.GET("/:todo_id", authUser, reactHandler.GetListReactedUsers())
+					react.POST("", authUser, reactHandler.ReactItem())
+					react.DELETE("", authUser, reactHandler.UnreactTodoItem())
+				}
+
 				v1.GET("/profile", authUser, userHandler.GetUserProfile())
 				v1.POST("/login", accountHandler.Login())
 				v1.POST("/register", accountHandler.RegisterAccount())

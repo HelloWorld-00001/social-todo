@@ -51,7 +51,7 @@ func (u Uid) String() string {
 }
 
 // Optional: Reverse the process
-func FromString(u *Uid, encoded string) (*Uid, error) {
+func GetUidFromString(encoded string) (*Uid, error) {
 	data, err := base64.URLEncoding.DecodeString(encoded)
 	if err != nil {
 		return nil, err

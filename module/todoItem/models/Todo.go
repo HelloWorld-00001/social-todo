@@ -1,7 +1,7 @@
 package models
 
 import (
-	common2 "github.com/coderconquerer/go-login-app/common"
+	common2 "github.com/coderconquerer/social-todo/common"
 	"time"
 )
 

@@ -1,6 +1,6 @@
 package Handler
 
-import "github.com/coderconquerer/go-login-app/module/user/BusinessUseCases"
+import "github.com/coderconquerer/social-todo/module/user/BusinessUseCases"
 
 type UserHandler struct {
 	GetUserBz *BusinessUseCases.FindUserLogic

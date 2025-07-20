@@ -1,6 +1,6 @@
 package Handler
 
-import "github.com/coderconquerer/go-login-app/module/todoItem/BusinessUseCases"
+import "github.com/coderconquerer/social-todo/module/todoItem/BusinessUseCases"
 
 type TodoHandler struct {
 	GetTodoDetailBz *BusinessUseCases.GetTodoDetailLogic

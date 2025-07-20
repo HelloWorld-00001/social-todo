@@ -2,8 +2,8 @@ package plugin
 
 import (
 	"context"
-	"github.com/coderconquerer/go-login-app/common"
-	"github.com/coderconquerer/go-login-app/plugin"
+	"github.com/coderconquerer/social-todo/common"
+	"github.com/coderconquerer/social-todo/plugin"
 )
 
 type UploadProvider interface {

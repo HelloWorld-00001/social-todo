@@ -1,7 +1,7 @@
 package Handler
 
 import (
-	"github.com/coderconquerer/go-login-app/common"
+	"github.com/coderconquerer/social-todo/common"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )

@@ -2,8 +2,8 @@ package BusinessUseCases
 
 import (
 	"errors"
-	"github.com/coderconquerer/go-login-app/common"
-	"github.com/coderconquerer/go-login-app/module/account/models"
+	"github.com/coderconquerer/social-todo/common"
+	"github.com/coderconquerer/social-todo/module/account/models"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 )

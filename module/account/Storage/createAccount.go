@@ -1,7 +1,7 @@
 package Storage
 
 import (
-	"github.com/coderconquerer/go-login-app/module/account/models"
+	"github.com/coderconquerer/social-todo/module/account/models"
 	"github.com/gin-gonic/gin"
 )
 

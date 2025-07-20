@@ -2,8 +2,8 @@ package Storage
 
 import (
 	"errors"
-	"github.com/coderconquerer/go-login-app/common"
-	"github.com/coderconquerer/go-login-app/module/user/models"
+	"github.com/coderconquerer/social-todo/common"
+	"github.com/coderconquerer/social-todo/module/user/models"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 )

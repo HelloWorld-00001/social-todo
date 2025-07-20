@@ -1,6 +1,6 @@
 package Handler
 
-import "github.com/coderconquerer/go-login-app/module/file/BusinessUseCases"
+import "github.com/coderconquerer/social-todo/module/file/BusinessUseCases"
 
 type UploadHandler struct {
 	UploadBz *BusinessUseCases.UploadFileLogic

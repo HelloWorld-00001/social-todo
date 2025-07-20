@@ -2,9 +2,9 @@ package BusinessUseCases
 
 import (
 	"errors"
-	common2 "github.com/coderconquerer/go-login-app/common"
-	model "github.com/coderconquerer/go-login-app/module/account/models"
-	"github.com/coderconquerer/go-login-app/module/user/models"
+	common2 "github.com/coderconquerer/social-todo/common"
+	"github.com/coderconquerer/social-todo/module/user/models"
+	model "github.com/coderconquerer/social-todo/module/user/models"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 )
@@ -23,12 +23,12 @@ func GetNewFindUserLogic(store FindUserStorage) *FindUserLogic {
 }
 
 func (bz *FindUserLogic) GetUserProfile(c *gin.Context) (*models.User, *common2.AppError) {
-	accInfo, ok := c.Get(common2.AccountContextKey)
+	accInfo, ok := c.Get(common2.CurrentUserContextKey)
 	if !ok {
 		return nil, common2.NewInternalSeverErrorResponse(errors.New("cannot get user information"), "Error when getting user information", "")
 	}
 	cdt := map[string]interface{}{
-		"Username": accInfo.(*model.Account).Username,
+		"Username": accInfo.(*model.User).Username,
 	}
 	userInfo, err := bz.store.FindUser(c, cdt)
 	if err != nil {

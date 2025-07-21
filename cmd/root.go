@@ -15,6 +15,7 @@ import (
 	"github.com/coderconquerer/social-todo/module/file/Handler"
 	todoBuc "github.com/coderconquerer/social-todo/module/todoItem/BusinessUseCases"
 	todoHdl "github.com/coderconquerer/social-todo/module/todoItem/Handler"
+	"github.com/coderconquerer/social-todo/module/todoItem/Repository"
 	todoStorage "github.com/coderconquerer/social-todo/module/todoItem/Storage"
 	userBuc "github.com/coderconquerer/social-todo/module/user/BusinessUseCases"
 	userHdl "github.com/coderconquerer/social-todo/module/user/Handler"
@@ -76,10 +77,18 @@ var rootCmd = &cobra.Command{
 			disableBsn := accBuc.GetNewDisableAccountLogic(accStore)
 			accountHandler := accountHdl.NewAccountHandler(loginBsn, registerBsn, disableBsn)
 
+			// reaction service
+			reactionStore := Storage.GetNewMySQLConnection(database)
+			reactBz := BusinessUseCases2.GetNewReactTodoItemLogic(reactionStore)
+			unReactBz := BusinessUseCases2.GetNewUnreactTodoItemLogic(reactionStore)
+			listRUBz := BusinessUseCases2.GetNewGetListReactedUsersLogic(reactionStore)
+			reactHandler := Handler2.NewReactionHandler(reactBz, unReactBz, listRUBz)
+
 			// to do service
 			todoStore := todoStorage.GetNewMySQLConnection(database)
 			getTodoDetailBz := todoBuc.GetNewGetTodoDetailLogic(todoStore)
-			getTodoListBz := todoBuc.GetNewGetTodoListLogic(todoStore)
+			getTodoListRepo := Repository.GetNewTodoListWithReactRepo(todoStore, reactionStore)
+			getTodoListBz := todoBuc.GetNewGetTodoListLogic(getTodoListRepo)
 			createTodoListBz := todoBuc.GetNewCreateTodoLogic(todoStore)
 			deleteTodoListBz := todoBuc.GetNewDeleteTodoItemLogic(todoStore)
 			todoHandler := todoHdl.NewTodoHandler(getTodoDetailBz, getTodoListBz, createTodoListBz, deleteTodoListBz)
@@ -88,13 +97,6 @@ var rootCmd = &cobra.Command{
 			userStore := userStorage.GetNewMySQLConnection(database)
 			getUserProfileBz := userBuc.GetNewFindUserLogic(userStore)
 			userHandler := userHdl.NewUserHandler(getUserProfileBz)
-
-			// reaction service
-			reactionStore := Storage.GetNewMySQLConnection(database)
-			reactBz := BusinessUseCases2.GetNewReactTodoItemLogic(reactionStore)
-			unReactBz := BusinessUseCases2.GetNewUnreactTodoItemLogic(reactionStore)
-			listRUBz := BusinessUseCases2.GetNewGetListReactedUsersLogic(reactionStore)
-			reactHandler := Handler2.NewReactionHandler(reactBz, unReactBz, listRUBz)
 
 			// aws services
 			uploadBsn := BusinessUseCases.GetNewUploadFileLogic(todoStore, userStore, s3Provider)

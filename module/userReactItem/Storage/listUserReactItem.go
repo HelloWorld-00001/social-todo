@@ -53,3 +53,26 @@ func (db *MySQLConnection) GetReactedUsers(c *gin.Context, todoId int, paginatio
 
 	return users, nil
 }
+
+func (db *MySQLConnection) GetReactedTodo(c *gin.Context, todoIds []int) (map[int]int, error) {
+	// filter deleted first
+	dbc := db.conn.Table(models.Reaction{}.TableName())
+	type AggReact struct {
+		LikeCount int
+		TodoId    int
+	}
+
+	var reactions []AggReact
+	if err := dbc.Select("TodoId, COUNT(TodoId) AS LikeCount").
+		Where("TodoId IN ?", todoIds).
+		Group("TodoId").
+		Scan(&reactions).Error; err != nil {
+		return nil, err
+	}
+	mp := make(map[int]int, len(reactions))
+	for _, val := range reactions {
+		mp[val.TodoId] = val.LikeCount
+	}
+
+	return mp, nil
+}

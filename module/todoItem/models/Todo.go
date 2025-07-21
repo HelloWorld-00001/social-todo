@@ -60,6 +60,6 @@ type TodoCreation struct {
 	Title       string    `gorm:"column:Title" json:"title"`
 }
 
-func (t *Todo) MarkupId() {
+func (t *Todo) CreateMarkupId() {
 	t.MakeMarkupId(common2.TodoEntity, 1)
 }

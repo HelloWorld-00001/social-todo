@@ -3,7 +3,6 @@ package Handler
 import (
 	common2 "github.com/coderconquerer/social-todo/common"
 	"github.com/gin-gonic/gin"
-	"log"
 	"net/http"
 )
 
@@ -14,7 +13,6 @@ func (th *TodoHandler) GetToDoList() gin.HandlerFunc {
 			c.JSON(http.StatusBadRequest, common2.NewInvalidInputError(err))
 			return
 		}
-		log.Println(pagination)
 		pagination.Process()
 
 		result, err := th.GetTodoListBz.GetTodoList(c, nil, &pagination)
@@ -24,7 +22,7 @@ func (th *TodoHandler) GetToDoList() gin.HandlerFunc {
 		}
 
 		for i := range result {
-			result[i].MarkupId() // ✅ modifies original struct
+			result[i].CreateMarkupId()
 		}
 		c.JSON(http.StatusOK, common2.StandardResponseWithoutFilter(result, pagination))
 	}

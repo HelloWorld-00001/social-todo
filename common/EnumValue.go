@@ -30,6 +30,7 @@ const (
 	ReactionUnreact
 	ReactionLove
 	ReactionWow
+	ReactionAngry
 )
 
 func (r Role) ToString() string {
@@ -71,6 +72,7 @@ var reactToString = map[React]string{
 	ReactionUnreact: "unreact",
 	ReactionLove:    "love",
 	ReactionWow:     "wow",
+	ReactionAngry:   "angry",
 }
 
 var stringToReact = map[string]React{
@@ -79,6 +81,7 @@ var stringToReact = map[string]React{
 	"unreact": ReactionUnreact,
 	"love":    ReactionLove,
 	"wow":     ReactionWow,
+	"angry":   ReactionWow,
 }
 
 // String returns the string representation of the React enum

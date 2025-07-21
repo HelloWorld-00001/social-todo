@@ -22,12 +22,27 @@ func (db *MySQLConnection) GetTodoList(c *gin.Context, filter *common2.Filter, p
 		return nil, err
 	}
 
+	if pagination.Cursor != "" {
+		cursor, err := common2.GetUidFromString(pagination.Cursor)
+		if err != nil {
+			return nil, err
+		}
+
+		dbc.Where("Id < ?", cursor.LocalId())
+	} else {
+		dbc.Offset((pagination.Page - 1) * pagination.Limit)
+	}
+
 	if err := dbc.Select("*").Order("Id desc").
-		Offset((pagination.Page - 1) * pagination.Limit).
 		Limit(pagination.Limit).
 		Find(&todos).Error; err != nil {
 		return nil, err
 	}
 
+	size := len(todos)
+	if size == pagination.Limit {
+		todos[size-1].CreateMarkupId()
+		pagination.NextCursor = todos[size-1].MarkupId.String()
+	}
 	return todos, nil
 }

@@ -29,7 +29,7 @@ func (rh *ReactionHandler) GetListReactedUsers() gin.HandlerFunc {
 		}
 
 		for i := range result {
-			result[i].MarkupId()
+			result[i].CreateMarkupId()
 		}
 		c.JSON(http.StatusOK, common2.StandardResponseWithoutFilter(result, pagination))
 	}

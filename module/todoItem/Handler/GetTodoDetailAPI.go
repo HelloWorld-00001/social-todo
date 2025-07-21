@@ -19,7 +19,7 @@ func (th *TodoHandler) GetTodoDetail() gin.HandlerFunc {
 			c.JSON(http.StatusInternalServerError, err2)
 			return
 		}
-		result.MarkupId()
+		result.CreateMarkupId()
 		c.JSON(http.StatusOK, common2.SimpleResponse(result))
 	}
 }

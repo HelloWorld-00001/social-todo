@@ -2,6 +2,7 @@ package Storage
 
 import (
 	"github.com/coderconquerer/social-todo/common"
+	"github.com/coderconquerer/social-todo/common/helper"
 	models2 "github.com/coderconquerer/social-todo/module/user/models"
 	"github.com/coderconquerer/social-todo/module/userReactItem/models"
 	"github.com/gin-gonic/gin"
@@ -16,19 +17,39 @@ func (db *MySQLConnection) GetReactedUsers(c *gin.Context, todoId int, paginatio
 		return nil, err
 	}
 
+	if pagination.Cursor != "" {
+		createdAt, err := helper.DecodeBase64URLToTime(pagination.Cursor)
+		if err != nil {
+			return nil, err
+		}
+
+		dbc.Where("CreatedAt < ?", createdAt.Format(helper.MySqlTimeLayout))
+	} else {
+		dbc.Offset((pagination.Page - 1) * pagination.Limit)
+	}
+
 	if err := dbc.Select("*").
 		Order("CreatedAt desc").
-		Offset((pagination.Page - 1) * pagination.Limit).
 		Limit(pagination.Limit).
 		Preload("ReactedUser").
 		Find(&reactions).Error; err != nil {
 		return nil, err
 	}
 
-	users := make([]models2.SimpleUser, len(reactions))
+	size := len(reactions)
+	users := make([]models2.SimpleUser, size)
+
 	for i := range users {
 		users[i] = *reactions[i].ReactedUser
+		users[i].CreatedAt = nil
+		users[i].UpdatedAt = nil
 		users[i].React = reactions[i].React.String()
+		users[i].ReactedAt = reactions[i].CreatedAt
 	}
+
+	if size == pagination.Limit {
+		pagination.NextCursor = helper.EncodeTimeToBase64URL(reactions[size-1].CreatedAt)
+	}
+
 	return users, nil
 }

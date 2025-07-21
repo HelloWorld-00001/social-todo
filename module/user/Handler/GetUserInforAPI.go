@@ -13,7 +13,7 @@ func (uh *UserHandler) GetUserProfile() gin.HandlerFunc {
 			c.JSON(http.StatusInternalServerError, err)
 			return
 		}
-		userInfo.MarkupId()
+		userInfo.CreateMarkupId()
 		c.JSON(http.StatusOK, common.SimpleResponse(userInfo))
 	}
 }

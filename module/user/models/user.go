@@ -2,6 +2,7 @@ package models
 
 import (
 	common "github.com/coderconquerer/social-todo/common"
+	"time"
 )
 
 func (User) TableName() string {
@@ -23,15 +24,16 @@ func (SimpleUser) TableName() string {
 
 type SimpleUser struct {
 	common.SqlModel
-	Email string `gorm:"column:Email;unique" json:"email"`
-	Name  string `gorm:"column:Name" json:"name"`
-	React string `gorm:"-" json:"react"`
+	Email     string    `gorm:"column:Email;unique" json:"email"`
+	Name      string    `gorm:"column:Name" json:"name"`
+	React     string    `gorm:"-" json:"react"`
+	ReactedAt time.Time `gorm:"-" json:"reacted_at"`
 }
 
-func (u *User) MarkupId() {
+func (u *User) CreateMarkupId() {
 	u.MakeMarkupId(common.UserEntity, 1)
 }
 
-func (u *SimpleUser) MarkupId() {
+func (u *SimpleUser) CreateMarkupId() {
 	u.MakeMarkupId(common.UserEntity, 1)
 }

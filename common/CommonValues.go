@@ -9,7 +9,11 @@ const (
 )
 
 const (
-	DbMainName = "mysql"
+	DbMainName   = "mysql"
+	PluginPubSub = "PubSub"
+
+	TopicIncreaseTotalReact = "TopicIncreaseTotalReact"
+	TopicDecreaseTotalReact = "TopicDecreaseTotalReact"
 )
 
 const (

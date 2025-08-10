@@ -27,6 +27,8 @@ import (
 	"github.com/coderconquerer/social-todo/plugin/tokenProviders/jwtProvider"
 	uploadPlugin "github.com/coderconquerer/social-todo/plugin/uploadProvider"
 	"github.com/coderconquerer/social-todo/plugin/uploadProvider/s3provider"
+	"github.com/coderconquerer/social-todo/pubsub"
+	"github.com/coderconquerer/social-todo/subscribers"
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-contrib/sessions/cookie"
 	"github.com/gin-gonic/gin"
@@ -49,6 +51,7 @@ func NewServices() goService.Service {
 		goService.WithInitRunnable(sdkgorm.NewGormDB("main-db", common.DbMainName)),
 		goService.WithInitRunnable(jwtProvider.GetNewJwtProvider(cfg.JwtConfig.JwtPrefix, cfg.JwtConfig.SecretKey)),
 		goService.WithInitRunnable(s3provider.NewS3ProviderWithConfig(awsCfg)),
+		goService.WithInitRunnable(pubsub.NewLocalPubsub(common.PluginPubSub)),
 	)
 
 	return service
@@ -69,7 +72,7 @@ var rootCmd = &cobra.Command{
 			database := service.MustGet(common.DbMainName).(*gorm.DB)
 			tokenProvider := service.MustGet(cfg.JwtConfig.JwtPrefix).(tokenPlugin.TokenProvider)
 			s3Provider := service.MustGet(awsCfg.S3Prefix).(uploadPlugin.UploadProvider)
-
+			ps := service.MustGet(common.PluginPubSub).(pubsub.PubSub)
 			// init services
 			accStore := accStorage.GetNewMySQLConnection(database)
 			registerBsn := accBuc.GetNewRegisterAccountLogic(accStore)
@@ -79,8 +82,8 @@ var rootCmd = &cobra.Command{
 
 			// reaction service
 			reactionStore := Storage.GetNewMySQLConnection(database)
-			reactBz := BusinessUseCases2.GetNewReactTodoItemLogic(reactionStore)
-			unReactBz := BusinessUseCases2.GetNewUnreactTodoItemLogic(reactionStore)
+			reactBz := BusinessUseCases2.GetNewReactTodoItemLogic(reactionStore, ps)
+			unReactBz := BusinessUseCases2.GetNewUnreactTodoItemLogic(reactionStore, ps)
 			listRUBz := BusinessUseCases2.GetNewGetListReactedUsersLogic(reactionStore)
 			reactHandler := Handler2.NewReactionHandler(reactBz, unReactBz, listRUBz)
 
@@ -146,6 +149,7 @@ var rootCmd = &cobra.Command{
 			})
 		})
 
+		_ = subscribers.NewEngine(service).Start()
 		if err := service.Start(); err != nil {
 			serviceLog.Fatalln(err)
 		}

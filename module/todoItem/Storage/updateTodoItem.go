@@ -1,12 +1,13 @@
 package Storage
 
 import (
+	"context"
 	common2 "github.com/coderconquerer/social-todo/common"
 	"github.com/coderconquerer/social-todo/module/todoItem/models"
-	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
 )
 
-func (db *MySQLConnection) UpdateTodoItem(c *gin.Context, filter *common2.Filter, pagination *common2.Pagination) ([]models.Todo, error) {
+func (db *MySQLConnection) UpdateTodoItem(c context.Context, filter *common2.Filter, pagination *common2.Pagination) ([]models.Todo, error) {
 	var todos []models.Todo
 	// filter deleted first
 	dbc := db.conn.Table(models.Todo{}.TableName())
@@ -30,4 +31,30 @@ func (db *MySQLConnection) UpdateTodoItem(c *gin.Context, filter *common2.Filter
 	}
 
 	return todos, nil
+}
+
+func (db *MySQLConnection) IncreaseTotalReactionCount(c context.Context, todoId int) error {
+	// filter deleted first
+	dbc := db.conn.Table(models.Todo{}.TableName())
+
+	if err := dbc.Where("Id = ?", todoId).
+		UpdateColumn("TotalReact", gorm.Expr("TotalReact + ?", 1)).
+		Error; err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (db *MySQLConnection) DecreaseTotalReactionCount(c context.Context, todoId int) error {
+	// filter deleted first
+	dbc := db.conn.Table(models.Todo{}.TableName())
+
+	if err := dbc.Where("Id = ?", todoId).
+		UpdateColumn("TotalReact", gorm.Expr("TotalReact - ?", 1)).
+		Error; err != nil {
+		return err
+	}
+
+	return nil
 }

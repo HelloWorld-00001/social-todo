@@ -4,8 +4,10 @@ import (
 	"errors"
 	"github.com/coderconquerer/social-todo/common"
 	"github.com/coderconquerer/social-todo/module/userReactItem/models"
+	"github.com/coderconquerer/social-todo/pubsub"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
+	"log"
 )
 
 type CreateReactionStorage interface {
@@ -14,10 +16,11 @@ type CreateReactionStorage interface {
 
 type ReactTodoItemLogic struct {
 	store CreateReactionStorage
+	ps    pubsub.PubSub
 }
 
-func GetNewReactTodoItemLogic(store CreateReactionStorage) *ReactTodoItemLogic {
-	return &ReactTodoItemLogic{store: store}
+func GetNewReactTodoItemLogic(store CreateReactionStorage, ps pubsub.PubSub) *ReactTodoItemLogic {
+	return &ReactTodoItemLogic{store, ps}
 }
 
 func (bz *ReactTodoItemLogic) ReactTodoItem(c *gin.Context, reaction models.Reaction) *common.AppError {
@@ -29,5 +32,10 @@ func (bz *ReactTodoItemLogic) ReactTodoItem(c *gin.Context, reaction models.Reac
 		return common.NewDatabaseError(err)
 	}
 
+	err2 := bz.ps.Publish(c, common.TopicIncreaseTotalReact, pubsub.NewMessage(reaction))
+
+	if err2 != nil {
+		log.Println(err2)
+	}
 	return nil
 }

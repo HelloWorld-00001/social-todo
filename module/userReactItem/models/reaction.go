@@ -23,3 +23,15 @@ type ReactionInput struct {
 	TodoId string `form:"todo_id" binding:"required"`
 	React  string `form:"reaction" binding:"required"`
 }
+
+func (r Reaction) GetTodoId() int {
+	return r.TodoId
+}
+
+func (r Reaction) GetUserId() int {
+	return r.UserId
+}
+
+func (r Reaction) GetReaction() string {
+	return r.React.String()
+}

@@ -11,6 +11,7 @@ const (
 const (
 	DbMainName   = "mysql"
 	PluginPubSub = "PubSub"
+	PluginRPC    = "RPC"
 
 	TopicIncreaseTotalReact = "TopicIncreaseTotalReact"
 	TopicDecreaseTotalReact = "TopicDecreaseTotalReact"

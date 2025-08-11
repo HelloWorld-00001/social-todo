@@ -30,11 +30,12 @@ func NewEngine(serviceCtx goservice.ServiceContext) *pbEngine {
 // Currently, it does nothing and just returns nil, but this is likely a placeholder
 // for initializing subscriptions, starting background tasks, or setting up listeners.
 func (engine *pbEngine) Start() error {
-	engine.startSubTopic(common.TopicIncreaseTotalReact, true,
+	_ = engine.startSubTopic(common.TopicIncreaseTotalReact, true,
 		IncreaseTotalReactionCount(engine.serviceCtx),
 		NotifyUserReactTodoItem(engine.serviceCtx))
-	engine.startSubTopic(common.TopicDecreaseTotalReact, false,
+	_ = engine.startSubTopic(common.TopicDecreaseTotalReact, false,
 		DecreaseTotalReactionCount(engine.serviceCtx))
+	// todo: handle error with side jobs
 	return nil
 }
 

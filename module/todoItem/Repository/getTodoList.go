@@ -10,19 +10,19 @@ type TodoListStorage interface {
 	GetTodoList(c *gin.Context, filter *common.Filter, pagination *common.Pagination) ([]models.Todo, error)
 }
 
-type ReactionCountStorage interface {
-	GetReactedTodo(c *gin.Context, todoIds []int) (map[int]int, error)
+type ReactionCountService interface {
+	GetTodoTotalReact(c *gin.Context, todoIds []int) (map[int]int, error)
 }
 
 type TodoListWithReactRepo struct {
-	todoStore  TodoListStorage
-	reactStore ReactionCountStorage
+	todoStore    TodoListStorage
+	reactService ReactionCountService
 }
 
-func GetNewTodoListWithReactRepo(todoStore TodoListStorage, reactStore ReactionCountStorage) *TodoListWithReactRepo {
+func GetNewTodoListWithReactRepo(todoStore TodoListStorage, reactStore ReactionCountService) *TodoListWithReactRepo {
 	return &TodoListWithReactRepo{
-		todoStore:  todoStore,
-		reactStore: reactStore,
+		todoStore:    todoStore,
+		reactService: reactStore,
 	}
 }
 
@@ -43,7 +43,7 @@ func (r *TodoListWithReactRepo) GetTodoListWithReactCount(c *gin.Context, filter
 		todoIds[i] = t.Id
 	}
 
-	reactionMap, err := r.reactStore.GetReactedTodo(c, todoIds)
+	reactionMap, err := r.reactService.GetTodoTotalReact(c, todoIds)
 	if err != nil {
 		return nil, err
 	}

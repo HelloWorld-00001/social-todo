@@ -38,6 +38,7 @@ func (ps *localPubSub) Publish(ctx context.Context, channel Topic, data *Message
 	data.SetChannel(channel)
 
 	// Run the publishing logic asynchronously in its own goroutine
+	// use go routine to not block caller
 	go func() {
 		// Ensure that if this goroutine panics, it will be recovered and not crash the program
 		defer common.Recovery()

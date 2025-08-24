@@ -15,7 +15,7 @@ func (th *TodoHandler) GetToDoList() gin.HandlerFunc {
 		}
 		pagination.Process()
 
-		result, err := th.GetTodoListBz.GetTodoList(c, nil, &pagination)
+		result, err := th.GetTodoListBz.GetTodoList(c.Request.Context(), nil, &pagination)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, err)
 			return

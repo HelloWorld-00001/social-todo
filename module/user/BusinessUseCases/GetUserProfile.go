@@ -1,6 +1,7 @@
 package BusinessUseCases
 
 import (
+	"context"
 	"errors"
 	"github.com/coderconquerer/social-todo/common"
 	"github.com/coderconquerer/social-todo/module/account/models"
@@ -10,7 +11,7 @@ import (
 
 type DisableAccountStorage interface {
 	HandleDisableAccount(c *gin.Context, id int, isDisable bool) error
-	FindAccount(c *gin.Context, conditions map[string]interface{}) (*models.Account, error)
+	FindAccount(c context.Context, conditions map[string]interface{}) (*models.Account, error)
 }
 
 type DisableAccountLogic struct {

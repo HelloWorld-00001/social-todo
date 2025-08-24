@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"context"
 	"errors"
 	common2 "github.com/coderconquerer/social-todo/common"
 	"github.com/coderconquerer/social-todo/module/account/models"
@@ -11,7 +12,7 @@ import (
 )
 
 type AuthorizationStore interface {
-	FindAccount(c *gin.Context, conditions map[string]interface{}) (*models.Account, error)
+	FindAccount(c context.Context, conditions map[string]interface{}) (*models.Account, error)
 }
 
 func ErrorWrongAuthHeader(err error) *common2.AppError {
@@ -47,7 +48,8 @@ func RequireAuth(provider tokenProviders.TokenProvider, store AuthorizationStore
 			"Id": payload.GetAccountId(),
 		}
 
-		account, err := store.FindAccount(c, condition)
+		ctx := c.Request.Context()
+		account, err := store.FindAccount(ctx, condition)
 		if err != nil || account == nil {
 			c.AbortWithStatusJSON(http.StatusUnauthorized, common2.NewUnauthorizedErrorCustom(err, "Account not found"))
 			return

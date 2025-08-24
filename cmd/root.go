@@ -1,9 +1,11 @@
 package cmd
 
 import (
+	"contrib.go.opencensus.io/exporter/jaeger"
 	"fmt"
 	goService "github.com/200Lab-Education/go-sdk"
 	"github.com/200Lab-Education/go-sdk/plugin/storage/sdkgorm"
+	"github.com/coderconquerer/social-todo/cache"
 	"github.com/coderconquerer/social-todo/common"
 	"github.com/coderconquerer/social-todo/configs"
 	"github.com/coderconquerer/social-todo/docs"
@@ -25,6 +27,7 @@ import (
 	BusinessUseCases2 "github.com/coderconquerer/social-todo/module/userReactItem/BusinessUseCases"
 	Handler2 "github.com/coderconquerer/social-todo/module/userReactItem/Handler"
 	"github.com/coderconquerer/social-todo/module/userReactItem/Storage"
+	"github.com/coderconquerer/social-todo/plugin/redis"
 	"github.com/coderconquerer/social-todo/plugin/rpc_caller"
 	tokenPlugin "github.com/coderconquerer/social-todo/plugin/tokenProviders"
 	"github.com/coderconquerer/social-todo/plugin/tokenProviders/jwtProvider"
@@ -38,7 +41,9 @@ import (
 	"github.com/spf13/cobra"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
+	"go.opencensus.io/trace"
 	"gorm.io/gorm"
+	"log"
 	"os"
 )
 
@@ -56,6 +61,7 @@ func NewServices() goService.Service {
 		goService.WithInitRunnable(s3provider.NewS3ProviderWithConfig(awsCfg)),
 		goService.WithInitRunnable(pubsub.NewLocalPubsub(common.PluginPubSub)),
 		goService.WithInitRunnable(rpc_caller.NewRpcCaller(common.PluginRPC)),
+		goService.WithInitRunnable(redis.NewRedisDB("redisDb", common.PluginRedis)),
 	)
 
 	return service
@@ -115,9 +121,12 @@ var rootCmd = &cobra.Command{
 			uploadHandler := Handler.NewUploadHandler(uploadBsn)
 			swaggerSetup()
 
+			// redis cache
+			redisService := cache.NewRedisCache(service)
+			userCache := cache.NewUserCaching(redisService, accStore)
 			// init middleware
-			authAdmin := middleware.RequireAuth(tokenProvider, accStore, common.AdminRole.ToString())
-			authUser := middleware.RequireAuth(tokenProvider, accStore, []string{common.AdminRole.ToString(), common.UserRole.ToString()}...) // multi-role access
+			authAdmin := middleware.RequireAuth(tokenProvider, userCache, common.AdminRole.ToString())
+			authUser := middleware.RequireAuth(tokenProvider, userCache, []string{common.AdminRole.ToString(), common.UserRole.ToString()}...) // multi-role access
 
 			//engine.Use(gin.Logger())
 			//engine.Use(middleware.CustomRecovery()) // custom middleware
@@ -128,7 +137,7 @@ var rootCmd = &cobra.Command{
 			{
 				todoRoutes := v1.Group("/todo")
 				{
-					todoRoutes.GET("", todoHandler.GetToDoList())
+					todoRoutes.GET("", authUser, todoHandler.GetToDoList())
 					todoRoutes.GET("/:id", todoHandler.GetTodoDetail())
 					//todoRoutes.PUT("/:id", Handler.GetTodoDetail(database))
 					todoRoutes.DELETE("/:id", authUser, todoHandler.DeleteTodoItem())
@@ -166,6 +175,18 @@ var rootCmd = &cobra.Command{
 				})
 			})
 		})
+
+		// todo-tracer: migrate to OpenTelementry
+		jg, err := jaeger.NewExporter(jaeger.Options{
+			AgentEndpoint: "localhost:6831",
+			Process: jaeger.Process{
+				ServiceName: "social-todo-app",
+			}})
+		if err != nil {
+			log.Fatalln(err)
+		}
+		trace.RegisterExporter(jg)
+		trace.ApplyConfig(trace.Config{DefaultSampler: trace.ProbabilitySampler(1)})
 
 		_ = subscribers.NewEngine(service).Start()
 		if err := service.Start(); err != nil {

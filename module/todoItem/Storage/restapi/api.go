@@ -1,9 +1,9 @@
 package restapi
 
 import (
+	"context"
 	"errors"
 	"fmt"
-	"github.com/gin-gonic/gin"
 	"github.com/go-resty/resty/v2"
 	"log"
 )
@@ -20,7 +20,7 @@ func NewTodoReactService(serviceUrl string, client *resty.Client) *todoReactServ
 	}
 }
 
-func (ts *todoReactService) GetTodoTotalReact(c *gin.Context, todoIds []int) (map[int]int, error) {
+func (ts *todoReactService) GetTodoTotalReact(c context.Context, todoIds []int) (map[int]int, error) {
 	type requestBody struct {
 		Ids []int `json:"ids"`
 	}

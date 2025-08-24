@@ -1,12 +1,17 @@
 package Storage
 
 import (
+	"context"
 	common2 "github.com/coderconquerer/social-todo/common"
 	"github.com/coderconquerer/social-todo/module/todoItem/models"
-	"github.com/gin-gonic/gin"
+	"go.opencensus.io/trace"
 )
 
-func (db *MySQLConnection) GetTodoList(c *gin.Context, filter *common2.Filter, pagination *common2.Pagination) ([]models.Todo, error) {
+func (db *MySQLConnection) GetTodoList(c context.Context, filter *common2.Filter, pagination *common2.Pagination) ([]models.Todo, error) {
+
+	_, span := trace.StartSpan(c, "todo.storage.GetTodoList")
+	defer span.End()
+
 	var todos []models.Todo
 	// filter deleted first
 	dbc := db.conn.Table(models.Todo{}.TableName())

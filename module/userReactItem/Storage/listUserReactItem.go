@@ -6,6 +6,7 @@ import (
 	models2 "github.com/coderconquerer/social-todo/module/user/models"
 	"github.com/coderconquerer/social-todo/module/userReactItem/models"
 	"github.com/gin-gonic/gin"
+	"go.opencensus.io/trace"
 )
 
 func (db *MySQLConnection) GetReactedUsers(c *gin.Context, todoId int, pagination *common.Pagination) ([]models2.SimpleUser, error) {
@@ -55,7 +56,8 @@ func (db *MySQLConnection) GetReactedUsers(c *gin.Context, todoId int, paginatio
 }
 
 func (db *MySQLConnection) GetReactedTodo(c *gin.Context, todoIds []int) (map[int]int, error) {
-	// filter deleted first
+	_, span := trace.StartSpan(c, "todo_react.storage.GetReactedTodo")
+	defer span.End()
 	dbc := db.conn.Table(models.Reaction{}.TableName())
 	type AggReact struct {
 		LikeCount int

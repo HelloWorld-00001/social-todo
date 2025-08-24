@@ -49,7 +49,7 @@ func (bz *LoginLogic) Login(c *gin.Context, acc models.AccountLogin) (tokenProvi
 		return nil, common2.NewInvalidUsernameOrPassword("Incorrect username or password")
 	}
 	payload := &common2.TokenPayload{
-		AccountId: account.AccountID,
+		AccountId: account.Id,
 		UserId:    account.User.Id,
 		Role:      account.Role,
 	}

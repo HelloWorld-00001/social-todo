@@ -7,7 +7,7 @@ func (Account) TableName() string {
 }
 
 type Account struct {
-	AccountID int    `gorm:"column:Id;primaryKey;autoIncrement" json:"-"`
+	Id        int    `gorm:"column:Id;primaryKey;autoIncrement" json:"-"`
 	Password  string `gorm:"column:Password" json:"password"`
 	Salt      string `gorm:"column:Salt" json:"-"`
 	Username  string `gorm:"column:Username;unique" json:"username"`

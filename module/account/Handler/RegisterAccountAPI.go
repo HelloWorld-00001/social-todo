@@ -20,6 +20,6 @@ func (ah *AccountHandler) RegisterAccount() gin.HandlerFunc {
 			return
 		}
 
-		c.JSON(http.StatusOK, common2.SimpleResponse(acc.AccountID))
+		c.JSON(http.StatusOK, common2.SimpleResponse(acc.Id))
 	}
 }

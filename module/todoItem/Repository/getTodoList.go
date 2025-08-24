@@ -1,17 +1,17 @@
 package Repository
 
 import (
+	"context"
 	"github.com/coderconquerer/social-todo/common"
 	"github.com/coderconquerer/social-todo/module/todoItem/models"
-	"github.com/gin-gonic/gin"
 )
 
 type TodoListStorage interface {
-	GetTodoList(c *gin.Context, filter *common.Filter, pagination *common.Pagination) ([]models.Todo, error)
+	GetTodoList(c context.Context, filter *common.Filter, pagination *common.Pagination) ([]models.Todo, error)
 }
 
 type ReactionCountService interface {
-	GetTodoTotalReact(c *gin.Context, todoIds []int) (map[int]int, error)
+	GetTodoTotalReact(c context.Context, todoIds []int) (map[int]int, error)
 }
 
 type TodoListWithReactRepo struct {
@@ -26,7 +26,7 @@ func GetNewTodoListWithReactRepo(todoStore TodoListStorage, reactStore ReactionC
 	}
 }
 
-func (r *TodoListWithReactRepo) GetTodoListWithReactCount(c *gin.Context, filter *common.Filter, pagination *common.Pagination) ([]models.Todo, error) {
+func (r *TodoListWithReactRepo) GetTodoListWithReactCount(c context.Context, filter *common.Filter, pagination *common.Pagination) ([]models.Todo, error) {
 	todos, err := r.todoStore.GetTodoList(c, filter, pagination)
 	if err != nil {
 		return nil, err

@@ -6,7 +6,6 @@
 bin/*
 pkg/*
 !.gitkeep
-
 # goop - go package manager
 vendor/
 
@@ -23,6 +22,7 @@ vendor/
 *.a
 *.so
 .env
+docker_command.md
 
 # Folders
 _obj

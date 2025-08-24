@@ -71,7 +71,7 @@ var rootCmd = &cobra.Command{
 		if err := service.Init(); err != nil {
 			serviceLog.Fatalln(err)
 		}
-		
+
 		service.HTTPServer().AddHandler(func(engine *gin.Engine) {
 			database := service.MustGet(common.DbMainName).(*gorm.DB)
 			tokenProvider := service.MustGet(cfg.JwtConfig.JwtPrefix).(tokenPlugin.TokenProvider)
@@ -142,9 +142,13 @@ var rootCmd = &cobra.Command{
 					react.DELETE("", authUser, reactHandler.UnreactTodoItem())
 				}
 
+				auth := v1.Group("/auth")
+				{
+					auth.POST("/login", accountHandler.Login())
+					auth.POST("/register", accountHandler.RegisterAccount())
+				}
+
 				v1.GET("/profile", authUser, userHandler.GetUserProfile())
-				v1.POST("/login", accountHandler.Login())
-				v1.POST("/register", accountHandler.RegisterAccount())
 				v1.POST("/disable", authAdmin, accountHandler.DisableAccount())
 				v1.POST("/upload", authUser, uploadHandler.UploadImage())
 
@@ -156,7 +160,7 @@ var rootCmd = &cobra.Command{
 			}
 			engine.Use(sessions.Sessions("mysession", store))
 			engine.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
-			engine.GET("/v1/api/todo/ping", func(c *gin.Context) {
+			engine.GET("/ping", func(c *gin.Context) {
 				c.JSON(200, gin.H{
 					"message": "pong",
 				})

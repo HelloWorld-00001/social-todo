@@ -9,6 +9,7 @@ import (
 	"github.com/coderconquerer/social-todo/common"
 	"github.com/coderconquerer/social-todo/configs"
 	"github.com/coderconquerer/social-todo/docs"
+	"github.com/coderconquerer/social-todo/grpc/contract"
 	"github.com/coderconquerer/social-todo/middleware"
 	accBuc "github.com/coderconquerer/social-todo/module/account/BusinessUseCases"
 	accountHdl "github.com/coderconquerer/social-todo/module/account/Handler"
@@ -20,12 +21,14 @@ import (
 	"github.com/coderconquerer/social-todo/module/todoItem/Handler/rpc"
 	"github.com/coderconquerer/social-todo/module/todoItem/Repository"
 	todoStorage "github.com/coderconquerer/social-todo/module/todoItem/Storage"
+	restapi2 "github.com/coderconquerer/social-todo/module/todoItem/Storage/grpc"
 	"github.com/coderconquerer/social-todo/module/todoItem/Storage/restapi"
 	userBuc "github.com/coderconquerer/social-todo/module/user/BusinessUseCases"
 	userHdl "github.com/coderconquerer/social-todo/module/user/Handler"
 	userStorage "github.com/coderconquerer/social-todo/module/user/Storage"
 	BusinessUseCases2 "github.com/coderconquerer/social-todo/module/userReactItem/BusinessUseCases"
 	Handler2 "github.com/coderconquerer/social-todo/module/userReactItem/Handler"
+	rpc2 "github.com/coderconquerer/social-todo/module/userReactItem/Handler/rpc"
 	"github.com/coderconquerer/social-todo/module/userReactItem/Storage"
 	"github.com/coderconquerer/social-todo/plugin/redis"
 	"github.com/coderconquerer/social-todo/plugin/rpc_caller"
@@ -42,8 +45,11 @@ import (
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
 	"go.opencensus.io/trace"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 	"gorm.io/gorm"
 	"log"
+	"net"
 	"os"
 )
 
@@ -77,13 +83,36 @@ var rootCmd = &cobra.Command{
 		if err := service.Init(); err != nil {
 			serviceLog.Fatalln(err)
 		}
+		// Create a listener on TCP port
+		lis, err := net.Listen("tcp", ":8082")
+		if err != nil {
+			log.Fatalln("Failed to listen:", err)
+		}
 
+		// Create a gRPC server object
+		s := grpc.NewServer()
 		service.HTTPServer().AddHandler(func(engine *gin.Engine) {
 			database := service.MustGet(common.DbMainName).(*gorm.DB)
 			tokenProvider := service.MustGet(cfg.JwtConfig.JwtPrefix).(tokenPlugin.TokenProvider)
 			s3Provider := service.MustGet(awsCfg.S3Prefix).(uploadPlugin.UploadProvider)
 			ps := service.MustGet(common.PluginPubSub).(pubsub.PubSub)
 			rpcCaller := service.MustGet(common.PluginRPC).(rpc_caller.RpcCaller)
+
+			// Create a client connection to the gRPC server we just started
+			// This is where the gRPC-Gateway proxies the requests
+
+			conn, err := grpc.NewClient(
+				"0.0.0.0:8082",
+				grpc.WithTransportCredentials(insecure.NewCredentials()),
+			)
+
+			//	TODO implement gateway
+			// Create client stub
+			client := contract.NewItemReactServiceClient(conn)
+			if err != nil {
+				log.Fatalln("Failed to dial server:", err)
+			}
+
 			// init services
 			accStore := accStorage.GetNewMySQLConnection(database)
 			registerBsn := accBuc.GetNewRegisterAccountLogic(accStore)
@@ -97,12 +126,12 @@ var rootCmd = &cobra.Command{
 			unReactBz := BusinessUseCases2.GetNewUnreactTodoItemLogic(reactionStore, ps)
 			listRUBz := BusinessUseCases2.GetNewGetListReactedUsersLogic(reactionStore)
 			reactHandler := Handler2.NewReactionHandler(reactBz, unReactBz, listRUBz)
-			reactRpcService := restapi.NewTodoReactService(rpcCaller.GetServiceUrl(), rpcCaller.GetClient())
-
+			_ = restapi.NewTodoReactService(rpcCaller.GetServiceUrl(), rpcCaller.GetClient())
+			rpcClient := restapi2.NewRpcClient(client)
 			// to do service
 			todoStore := todoStorage.GetNewMySQLConnection(database)
 			getTodoDetailBz := todoBuc.GetNewGetTodoDetailLogic(todoStore)
-			getTodoListRepo := Repository.GetNewTodoListWithReactRepo(todoStore, reactRpcService)
+			getTodoListRepo := Repository.GetNewTodoListWithReactRepo(todoStore, rpcClient)
 			getTodoListBz := todoBuc.GetNewGetTodoListLogic(getTodoListRepo)
 			createTodoListBz := todoBuc.GetNewCreateTodoLogic(todoStore)
 			deleteTodoListBz := todoBuc.GetNewDeleteTodoItemLogic(todoStore)
@@ -128,6 +157,15 @@ var rootCmd = &cobra.Command{
 			authAdmin := middleware.RequireAuth(tokenProvider, userCache, common.AdminRole.ToString())
 			authUser := middleware.RequireAuth(tokenProvider, userCache, []string{common.AdminRole.ToString(), common.UserRole.ToString()}...) // multi-role access
 
+			// rpc
+			// Attach the Greeter service to the server
+			contract.RegisterItemReactServiceServer(s, rpc2.NewRpcService(listRUBz))
+
+			// Serve gRPC Server
+			go func() {
+				log.Println("Serving gRPC on 0.0.0.0:8082")
+				log.Fatal(s.Serve(lis))
+			}()
 			//engine.Use(gin.Logger())
 			//engine.Use(middleware.CustomRecovery()) // custom middleware
 			//auth := engine.Group("/")b

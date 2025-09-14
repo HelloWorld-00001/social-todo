@@ -1,6 +1,7 @@
 package Storage
 
 import (
+	"context"
 	"github.com/coderconquerer/social-todo/common"
 	"github.com/coderconquerer/social-todo/common/helper"
 	models2 "github.com/coderconquerer/social-todo/module/user/models"
@@ -55,7 +56,7 @@ func (db *MySQLConnection) GetReactedUsers(c *gin.Context, todoId int, paginatio
 	return users, nil
 }
 
-func (db *MySQLConnection) GetReactedTodo(c *gin.Context, todoIds []int) (map[int]int, error) {
+func (db *MySQLConnection) GetReactedTodo(c context.Context, todoIds []int) (map[int]int, error) {
 	_, span := trace.StartSpan(c, "todo_react.storage.GetReactedTodo")
 	defer span.End()
 	dbc := db.conn.Table(models.Reaction{}.TableName())

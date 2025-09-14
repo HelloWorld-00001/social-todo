@@ -1,11 +1,12 @@
 package BusinessUseCases
 
 import (
+	"context"
 	"github.com/gin-gonic/gin"
 )
 
 type ReactionCountStorage interface {
-	GetReactedTodo(c *gin.Context, todoIds []int) (map[int]int, error)
+	GetReactedTodo(c context.Context, todoIds []int) (map[int]int, error)
 }
 
 type GetTodoItemTotalReactLogic struct {

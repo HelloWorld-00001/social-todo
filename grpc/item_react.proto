@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+package item_react;
+
+option go_package = "contract/";
+
+
+message GetTotalReactByIdsRequest {
+  repeated int32 ids = 1;
+}
+
+message GetTotalReactByIdsResponse {
+  map<int32, int32> result = 1;
+}
+
+service ItemReactService {
+  rpc GetTotalReactByIds(GetTotalReactByIdsRequest) returns (GetTotalReactByIdsResponse);
+}

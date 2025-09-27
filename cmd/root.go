@@ -1,11 +1,13 @@
 package cmd
 
 import (
+	"context"
 	"contrib.go.opencensus.io/exporter/jaeger"
 	"fmt"
 	goService "github.com/200Lab-Education/go-sdk"
 	"github.com/200Lab-Education/go-sdk/plugin/storage/sdkgorm"
 	"github.com/coderconquerer/social-todo/cache"
+	"github.com/coderconquerer/social-todo/cmd/registerservice"
 	"github.com/coderconquerer/social-todo/common"
 	"github.com/coderconquerer/social-todo/configs"
 	"github.com/coderconquerer/social-todo/docs"
@@ -41,6 +43,7 @@ import (
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-contrib/sessions/cookie"
 	"github.com/gin-gonic/gin"
+	amqp "github.com/rabbitmq/amqp091-go"
 	"github.com/spf13/cobra"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
@@ -51,6 +54,8 @@ import (
 	"log"
 	"net"
 	"os"
+	"strconv"
+	"time"
 )
 
 var (
@@ -122,7 +127,9 @@ var rootCmd = &cobra.Command{
 
 			// reaction service
 			reactionStore := Storage.GetNewMySQLConnection(database)
-			reactBz := BusinessUseCases2.GetNewReactTodoItemLogic(reactionStore, ps)
+
+			test := registerservice.NewRabbitMQPublisher("amqp://guest:guest@localhost:5672/", "RabbitMQ_Test")
+			reactBz := BusinessUseCases2.GetNewReactTodoItemLogic(reactionStore, ps, test)
 			unReactBz := BusinessUseCases2.GetNewUnreactTodoItemLogic(reactionStore, ps)
 			listRUBz := BusinessUseCases2.GetNewGetListReactedUsersLogic(reactionStore)
 			reactHandler := Handler2.NewReactionHandler(reactBz, unReactBz, listRUBz)
@@ -220,6 +227,8 @@ var rootCmd = &cobra.Command{
 			Process: jaeger.Process{
 				ServiceName: "social-todo-app",
 			}})
+
+		go processFib()
 		if err != nil {
 			log.Fatalln(err)
 		}
@@ -249,4 +258,84 @@ func swaggerSetup() {
 	docs.SwaggerInfo.Host = "localhost:8080"
 	docs.SwaggerInfo.BasePath = "/"
 	docs.SwaggerInfo.Schemes = []string{"http"}
+}
+
+func fib(n int) int {
+	if n == 0 {
+		return 0
+	} else if n == 1 {
+		return 1
+	} else {
+		return fib(n-1) + fib(n-2)
+	}
+}
+
+func processFib() {
+	conn, err := amqp.Dial("amqp://guest:guest@localhost:5672/")
+	log.Printf("Failed to connect to RabbitMQ rp %v", err)
+	fmt.Printf("Failed to connect to RabbitMQ server: %v", err)
+	defer conn.Close()
+
+	ch, err := conn.Channel()
+	fmt.Println(err, "Failed to open a channel")
+	defer ch.Close()
+
+	q, err := ch.QueueDeclare(
+		"rpc_queue", // name
+		false,       // durable
+		false,       // delete when unused
+		false,       // exclusive
+		false,       // no-wait
+		nil,         // arguments
+	)
+	fmt.Println(err, "Failed to declare a queue")
+
+	err = ch.Qos(
+		1,     // prefetch count
+		0,     // prefetch size
+		false, // global
+	)
+	fmt.Println(err, "Failed to set QoS")
+
+	msgs, err := ch.Consume(
+		q.Name, // queue
+		"",     // consumer
+		false,  // auto-ack
+		false,  // exclusive
+		false,  // no-local
+		false,  // no-wait
+		nil,    // args
+	)
+	fmt.Println(err, "Failed to register a consumer")
+
+	var forever chan struct{}
+
+	go func() {
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
+		for d := range msgs {
+			n, err := strconv.Atoi(string(d.Body))
+			fmt.Println(err, "Failed to convert body to integer")
+
+			log.Printf(" [.] fib(%d)", n)
+			response := fib(n)
+
+			err = ch.PublishWithContext(ctx,
+				"",        // exchange
+				d.ReplyTo, // routing key
+				false,     // mandatory
+				false,     // immediate
+				amqp.Publishing{
+					ContentType:   "text/plain",
+					CorrelationId: d.CorrelationId,
+					Body:          []byte(strconv.Itoa(response)),
+				})
+			fmt.Println(err, "Failed to publish a message")
+
+			d.Ack(false)
+		}
+	}()
+
+	log.Printf(" [*] Awaiting RPC requests")
+	<-forever
 }

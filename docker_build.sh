@@ -5,7 +5,7 @@ IMAGE_NAME=social-todo-image
 IMAGE_CACHED_NAME=social-todo-lib-cached
 
 # First argument to script (optional) – if provided, we will build cached image
-CACHED_BUILD=$1
+MODE=$1
 
 # If a cached build flag/argument is passed in
 if [[ "$MODE" == "cache" || "$MODE" == "1" ]]; then

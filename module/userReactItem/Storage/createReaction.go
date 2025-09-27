@@ -1,11 +1,11 @@
 package Storage
 
 import (
+	"context"
 	"github.com/coderconquerer/social-todo/module/userReactItem/models"
-	"github.com/gin-gonic/gin"
 )
 
-func (db *MySQLConnection) CreateReaction(c *gin.Context, reaction models.Reaction) error {
+func (db *MySQLConnection) CreateReaction(c context.Context, reaction models.Reaction) error {
 	// filter deleted first
 	dbc := db.conn.Table(models.Reaction{}.TableName())
 

@@ -1,0 +1,86 @@
+version: "3.9"
+
+services:
+  db:
+    image: mysql:8.0
+    container_name: todo-db
+    environment:
+      MYSQL_ROOT_PASSWORD: 123456
+      MYSQL_DATABASE: social-todo-db
+    networks:
+      - social-network
+    ports:
+      - "3307:3306"   # optional: access db from host
+
+  nginx-proxy:
+    image: nginxproxy/nginx-proxy:1.8
+    container_name: nginx-proxy
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - /var/run/docker.sock:/tmp/docker.sock:ro
+    networks:
+      - social-network
+
+  social-todo-app:
+    image: social-todo-image:latest
+    container_name: social-todo-app
+    depends_on:
+      - db
+      - social-todo-react
+    environment:
+      MYSQL_GORM_DB_URI: "root:123456@tcp(db)/social-todo-db?charset=utf8mb4&parseTime=True&loc=Local"
+      MYSQL_GORM_DB_TYPE: mysql
+      JWT_PREFIX: jwt
+      JWT_SECRET_KEY: super-secret-key
+      VIRTUAL_HOST: localhost
+      VIRTUAL_PORT: 8080
+      VIRTUAL_PATH: /v1/api/todo
+      RPC_TODO_REACT_SERVICE_URL: "http://social-todo-react:8081/v1/api"
+      GINPORT: 8080
+    expose:
+      - "8080"
+    networks:
+      - social-network
+
+  social-todo-login:
+    image: social-todo-image:latest
+    container_name: social-todo-login
+    depends_on:
+      - db
+    environment:
+      MYSQL_GORM_DB_URI: "root:123456@tcp(db)/social-todo-db?charset=utf8mb4&parseTime=True&loc=Local"
+      MYSQL_GORM_DB_TYPE: mysql
+      JWT_PREFIX: jwt
+      JWT_SECRET_KEY: super-secret-key
+      VIRTUAL_HOST: localhost
+      VIRTUAL_PORT: 8080
+      VIRTUAL_PATH: /v1/api/auth
+    expose:
+      - "8080"
+    networks:
+      - social-network
+
+  social-todo-react:
+    image: social-todo-image:latest
+    container_name: social-todo-react
+    depends_on:
+      - db
+    environment:
+      MYSQL_GORM_DB_URI: "root:123456@tcp(db)/social-todo-db?charset=utf8mb4&parseTime=True&loc=Local"
+      MYSQL_GORM_DB_TYPE: mysql
+      JWT_PREFIX: jwt
+      JWT_SECRET_KEY: super-secret-key
+      VIRTUAL_HOST: localhost
+      VIRTUAL_PORT: 8081
+      VIRTUAL_PATH: /v1/api/rpc
+      GINPORT: 8081
+    expose:
+      - "8081"
+    networks:
+      - social-network
+
+networks:
+  social-network:
+    driver: bridge

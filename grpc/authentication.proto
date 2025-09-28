@@ -1,0 +1,47 @@
+syntax = "proto3";
+
+package authentication;
+
+option go_package = "contract/";
+// -----------------------------
+// Service definition
+// -----------------------------
+service AuthenticationService {
+  rpc Login (LoginRequest) returns (LoginResponse);
+  rpc RegisterAccount (RegisterAccountRequest) returns (RegisterAccountResponse);
+  rpc DisableAccount (DisableAccountRequest) returns (DisableAccountResponse);
+}
+
+// -----------------------------
+// Messages
+// -----------------------------
+
+// Login
+message LoginRequest {
+  string username = 1;
+  string password = 2;
+}
+
+message LoginResponse {
+  string token = 1;            // auth token or session info
+}
+
+// Register
+message RegisterAccountRequest {
+  string username = 1;
+  string password = 2;
+}
+
+message RegisterAccountResponse {
+  bool success = 1;                // true if create successfully, otherwise false
+}
+
+// Disable Account
+message DisableAccountRequest {
+  int32 id = 1;                // account id
+  int32 disable = 2;            // 0 = disable, 1 = enable
+}
+
+message DisableAccountResponse {
+  bool success = 1;
+}

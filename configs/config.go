@@ -24,6 +24,12 @@ type JWTConfig struct {
 	JwtPrefix string
 }
 
+type GrpcPort struct {
+	TodoReactionPort   string
+	AuthenticationPort string
+	GrpcStart          bool
+}
+
 type AWSConfig struct {
 	S3Prefix  string
 	SecretKey string
@@ -85,11 +91,6 @@ func Load() *Config {
 
 func LoadAWSConfig() *AWSConfig {
 	InitEnv()
-	err := godotenv.Load()
-	if err != nil {
-		log.Println(".env file not found, relying on environment variables")
-	}
-
 	return &AWSConfig{
 		S3Prefix:  os.Getenv("AWS_S3_PREFIX"),
 		PublicKey: os.Getenv("AWS_S3_PUBLIC_KEY"),
@@ -97,5 +98,14 @@ func LoadAWSConfig() *AWSConfig {
 		Region:    os.Getenv("AWS_S3_REGION"),
 		Domain:    os.Getenv("AWS_S3_DOMAIN"),
 		Bucket:    os.Getenv("AWS_S3_BUCKET"),
+	}
+}
+
+func LoadGrpcPort() *GrpcPort {
+	InitEnv()
+	return &GrpcPort{
+		TodoReactionPort:   os.Getenv("GRPC_TODO_REACTION_PORT"),
+		AuthenticationPort: os.Getenv("GRPC_AUTHENTICATION_PORT"),
+		GrpcStart:          os.Getenv("GRPC_START") == "true",
 	}
 }

@@ -16,7 +16,7 @@ type TodoStorage interface {
 }
 
 type TodoListWithReactRepo interface {
-	// GetReactedTodo(c context.Context, todoIds []int) (map[int]int, error) -todo enable later
+	//GetReactedTodo(c context.Context, todoIds []int) (map[int]int, error)
 	GetTodoListWithReactCount(c context.Context, filter *common.Filter, pagination *common.Pagination) ([]entity.Todo, error)
 }
 
@@ -26,8 +26,7 @@ type TodoBusiness interface {
 	DeleteTodoItem(c context.Context, id int) error
 	GetTodoDetail(c context.Context, id int) (*entity.Todo, error)
 	GetTodoList(c context.Context, filter *common.Filter, pagination *common.Pagination) ([]entity.Todo, error)
-	// enable later
-	// GetTodoItemTotalReact(c context.Context, todoIds []int) (map[int]int, error)
+	//GetTodoItemTotalReact(c context.Context, todoIds []int) (map[int]int, error)
 }
 
 // todoBusiness Main business struct

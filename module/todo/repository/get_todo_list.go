@@ -6,7 +6,6 @@ import (
 	"github.com/coderconquerer/social-todo/common"
 	"github.com/coderconquerer/social-todo/module/todo/entity"
 	amqp "github.com/rabbitmq/amqp091-go"
-	"log"
 	"math/rand"
 	"strconv"
 	"time"
@@ -52,7 +51,7 @@ func (r *TodoListWithReactRepo) GetTodoListWithReactCount(c context.Context, fil
 	go func() {
 		fmt.Printf(" [x] Requesting fib(%d)", 10)
 		res, err := fibonacciRPC(10)
-		fmt.Println(err, "Failed to handle RPC request")
+		printIfError("Failed to handle RPC request", err)
 		fmt.Printf(" [.] Got %d", res)
 	}()
 
@@ -68,15 +67,20 @@ func (r *TodoListWithReactRepo) GetTodoListWithReactCount(c context.Context, fil
 	return todos, nil
 }
 
+func printIfError(message string, err error) {
+	if err != nil {
+		fmt.Printf("%s: %v", message, err)
+	}
+}
+
 func fibonacciRPC(n int) (res int, err error) {
 	conn, err := amqp.Dial("amqp://guest:guest@localhost:5672/")
-	log.Printf("Failed to connect to RabbitMQ server: %v", err)
-	fmt.Printf("Failed to connect to RabbitMQ server: %v", err)
+	printIfError("Failed to connect to RabbitMQ server", err)
 
 	defer conn.Close()
 
 	ch, err := conn.Channel()
-	fmt.Print(err, "Failed to open a channel")
+	printIfError("Failed to open a channel", err)
 	defer ch.Close()
 
 	q, err := ch.QueueDeclare(
@@ -87,7 +91,7 @@ func fibonacciRPC(n int) (res int, err error) {
 		false, // noWait
 		nil,   // arguments
 	)
-	fmt.Print(err, "Failed to declare a queue")
+	printIfError("Failed to declare a queue", err)
 
 	msgs, err := ch.Consume(
 		q.Name, // queue
@@ -98,7 +102,7 @@ func fibonacciRPC(n int) (res int, err error) {
 		false,  // no-wait
 		nil,    // args
 	)
-	fmt.Print(err, "Failed to register a consumer")
+	printIfError("Failed to register a consumer", err)
 
 	corrId := randomString(32)
 
@@ -116,12 +120,12 @@ func fibonacciRPC(n int) (res int, err error) {
 			ReplyTo:       q.Name,
 			Body:          []byte(strconv.Itoa(n)),
 		})
-	fmt.Print(err, "Failed to publish a message")
+	printIfError("Failed to publish a message", err)
 
 	for d := range msgs {
 		if corrId == d.CorrelationId {
 			res, err = strconv.Atoi(string(d.Body))
-			fmt.Print(err, "Failed to convert body to integer")
+			printIfError("Failed to convert body to integer", err)
 			break
 		}
 	}

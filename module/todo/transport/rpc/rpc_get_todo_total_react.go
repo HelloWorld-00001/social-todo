@@ -13,14 +13,15 @@ func (rh *RpcHandler) GetTodoTotalReact() gin.HandlerFunc {
 		}
 		var ids TodoIds
 		if err := c.ShouldBind(&ids); err != nil {
-			c.JSON(http.StatusBadRequest, common.NewInvalidInputError(err))
+			common.RespondError(c, common.BadRequest.WithError(common.ErrInvalidInput).WithRootCause(err))
 			return
 		}
 
-		reactionMap, err := rh.GetTodoItemTotalReactBz.GetTodoItemTotalReact(c, ids.Ids)
+		reactionMap, errBz := rh.GetTodoItemTotalReactBz.GetTodoItemTotalReact(c, ids.Ids)
 
-		if err != nil {
-			c.JSON(http.StatusInternalServerError, common.NewInternalSeverErrorResponse(err, err.Error(), err.Error()))
+		if errBz != nil {
+			common.RespondError(c, errBz)
+
 			return
 		}
 

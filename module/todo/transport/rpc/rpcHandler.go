@@ -3,10 +3,10 @@ package rpc
 import "github.com/coderconquerer/social-todo/module/todo/business"
 
 type RpcHandler struct {
-	GetTodoItemTotalReactBz *business.todoBusiness
+	GetTodoItemTotalReactBz business.TodoBusiness
 }
 
-func NewRpcHandler(getTodoItemTotalReactBz *business.todoBusiness) *RpcHandler {
+func NewRpcHandler(getTodoItemTotalReactBz business.TodoBusiness) *RpcHandler {
 	return &RpcHandler{
 		GetTodoItemTotalReactBz: getTodoItemTotalReactBz,
 	}

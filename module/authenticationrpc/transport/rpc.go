@@ -1,26 +1,27 @@
-package authAPI
+package transport
 
 import (
 	"errors"
 	"github.com/coderconquerer/social-todo/common"
-	"github.com/coderconquerer/social-todo/module/authentication/business"
-	"github.com/coderconquerer/social-todo/module/authentication/entity"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"strconv"
+
+	"github.com/coderconquerer/social-todo/module/authenticationrpc/business"
+	"github.com/coderconquerer/social-todo/module/authenticationrpc/entity"
 )
 
-type AuthenticationAPI interface {
+type AuthenticationRpcAPI interface {
 	Login() gin.HandlerFunc
 	DisableAccount() gin.HandlerFunc
 	RegisterAccount() gin.HandlerFunc
 }
 
 type authenticationAPI struct {
-	business business.AuthenticationBusiness
+	business business.AuthenticationBusinessGrpc
 }
 
-func NewAuthenticationAPI(logic business.AuthenticationBusiness) AuthenticationAPI {
+func NewAuthenticationAPI(logic business.AuthenticationBusinessGrpc) AuthenticationRpcAPI {
 	return &authenticationAPI{logic}
 }
 

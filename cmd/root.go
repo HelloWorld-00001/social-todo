@@ -25,7 +25,8 @@ var rootCmd = &cobra.Command{
 		}
 
 		// --- setup components ---
-		ssu.StartGrpcServer(service, log)
+		ssu.StartTodoReactionGrpcServer(service, log)
+		ssu.StartAuthenticationGrpcServer(service, log)
 		ssu.StartHttpServer(service)
 		ssu.SetupTracing(log)
 		ssu.StartSubscribers(service)

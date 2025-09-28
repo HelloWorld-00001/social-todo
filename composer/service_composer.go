@@ -9,6 +9,8 @@ import (
 	authBusiness "github.com/coderconquerer/social-todo/module/authentication/business"
 	authStorage "github.com/coderconquerer/social-todo/module/authentication/storage"
 	"github.com/coderconquerer/social-todo/module/authentication/transport"
+	authGprcBusiness "github.com/coderconquerer/social-todo/module/authenticationrpc/business"
+	"github.com/coderconquerer/social-todo/module/authenticationrpc/transport"
 	uploadBusiness "github.com/coderconquerer/social-todo/module/file/business"
 	"github.com/coderconquerer/social-todo/module/file/transport"
 	"github.com/coderconquerer/social-todo/module/todo/business"
@@ -32,8 +34,9 @@ import (
 )
 
 var (
-	cfg    = configs.Load()
-	awsCfg = configs.LoadAWSConfig()
+	cfg        = configs.Load()
+	awsCfg     = configs.LoadAWSConfig()
+	grpcConfig = configs.LoadGrpcPort()
 )
 
 func GetTodoAPIService(sCtx serviceCtx.ServiceContext) api.TodoAPI {
@@ -42,7 +45,7 @@ func GetTodoAPIService(sCtx serviceCtx.ServiceContext) api.TodoAPI {
 
 	storage := mysql.GetNewMySQLConnection(database)
 	conn, err := grpc.NewClient(
-		"0.0.0.0:8082",
+		"0.0.0.0:"+grpcConfig.TodoReactionPort,
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 	)
 
@@ -70,6 +73,26 @@ func GetAuthenticationAPIService(sCtx serviceCtx.ServiceContext) authAPI.Authent
 	// todo move expire time to config
 
 	return authAPI.NewAuthenticationAPI(bz)
+}
+
+func GetAuthenticationGrpcAPIService(sCtx serviceCtx.ServiceContext) authAPI.AuthenticationAPI {
+
+	tokenProvider := sCtx.MustGet(cfg.JwtConfig.JwtPrefix).(tokenPlugin.TokenProvider)
+	conn, err := grpc.NewClient(
+		"0.0.0.0:"+grpcConfig.AuthenticationPort,
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
+	)
+
+	if err != nil {
+		log.Fatalln("Failed to connect to grpc server:", err)
+	}
+
+	// init services
+	client := contract.NewAuthenticationServiceClient(conn)
+	bz := authGprcBusiness.NewAuthenticationBusinessGrpc(client, tokenProvider, 60*60*24*30)
+	// todo move expire time to config
+
+	return transport.NewAuthenticationAPI(bz)
 }
 
 func GetUserAPIService(sCtx serviceCtx.ServiceContext) userApi.UserAPI {

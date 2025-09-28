@@ -23,7 +23,7 @@ type AuthenticationStorage interface {
 // AuthenticationBusiness defines the contract for authentication logic
 type AuthenticationBusiness interface {
 	Login(c context.Context, acc entity.AccountLogin) (tokenProviders.Token, error)
-	RegisterAccount(c context.Context, acc *entity.Account) error
+	RegisterAccount(c context.Context, acc *entity.AccountRegister) error
 	DisableAccount(c context.Context, id int, isDisable bool) error
 }
 
@@ -69,7 +69,7 @@ func (bz *authenticationBusiness) Login(c context.Context, acc entity.AccountLog
 	return accessToken, nil
 }
 
-func (bz *authenticationBusiness) RegisterAccount(c context.Context, acc *entity.Account) error {
+func (bz *authenticationBusiness) RegisterAccount(c context.Context, acc *entity.AccountRegister) error {
 	account, err := bz.store.FindAccountByUsername(c, acc.Username)
 	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 		return common.InternalServerError.WithError(common.ErrUnhandleError).WithRootCause(err)
@@ -88,11 +88,14 @@ func (bz *authenticationBusiness) RegisterAccount(c context.Context, acc *entity
 		return common.InternalServerError.WithError(errors.New("error when hashing password")).WithRootCause(errHash)
 	}
 
-	acc.Password = pw
-	acc.Salt = salt
-	acc.Role = common.UserRole.ToString()
+	newAccount := &entity.Account{
+		Username: acc.Username,
+		Password: pw,
+		Salt:     salt,
+		Role:     common.UserRole.ToString(),
+	}
 
-	if errBz := bz.store.CreateAccount(c, acc); errBz != nil {
+	if errBz := bz.store.CreateAccount(c, newAccount); errBz != nil {
 		return common.InternalServerError.WithError(entity.ErrCannotCreateAccount).WithRootCause(errBz)
 	}
 	return nil

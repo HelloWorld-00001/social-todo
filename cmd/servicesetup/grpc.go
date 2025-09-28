@@ -1,6 +1,7 @@
 package servicesetup
 
 import (
+	"github.com/coderconquerer/social-todo/configs"
 	"go.uber.org/zap"
 	"net"
 
@@ -11,8 +12,14 @@ import (
 	"google.golang.org/grpc"
 )
 
-func StartGrpcServer(service goService.Service, log *zap.Logger) {
-	lis, err := net.Listen("tcp", ":8082")
+var grpcConfig = configs.LoadGrpcPort()
+
+func StartTodoReactionGrpcServer(service goService.Service, log *zap.Logger) {
+	if grpcConfig.GrpcStart {
+		log.Info("skip start TodoReactionGrpc grpc")
+		return
+	}
+	lis, err := net.Listen("tcp", ":"+grpcConfig.TodoReactionPort)
 	if err != nil {
 		log.Fatal("Failed to listen", zap.Error(err))
 	}
@@ -23,7 +30,30 @@ func StartGrpcServer(service goService.Service, log *zap.Logger) {
 	)
 
 	go func() {
-		log.Info("Serving gRPC on 0.0.0.0:8082")
+		log.Info("Serving TodoReactionGrpc", zap.String("addr", "0.0.0.0:"+grpcConfig.AuthenticationPort))
+		if err := grpcServer.Serve(lis); err != nil {
+			log.Fatal("Failed to listen", zap.Error(err))
+		}
+	}()
+}
+
+func StartAuthenticationGrpcServer(service goService.Service, log *zap.Logger) {
+	if grpcConfig.GrpcStart {
+		log.Info("skip start AuthenticationGrpc grpc")
+		return
+	}
+	lis, err := net.Listen("tcp", ":"+grpcConfig.AuthenticationPort)
+	if err != nil {
+		log.Fatal("Failed to listen", zap.Error(err))
+	}
+
+	grpcServer := grpc.NewServer()
+	contract.RegisterItemReactServiceServer(grpcServer,
+		rpc.NewRpcService(composer.GetTodoReactionService(service)),
+	)
+
+	go func() {
+		log.Info("Serving AuthenticationGrpc", zap.String("addr", "0.0.0.0:"+grpcConfig.AuthenticationPort))
 		if err := grpcServer.Serve(lis); err != nil {
 			log.Fatal("Failed to listen", zap.Error(err))
 		}

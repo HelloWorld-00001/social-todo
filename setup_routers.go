@@ -24,7 +24,6 @@ func SetupRoutes(route *gin.RouterGroup, sCtx serviceCtx.ServiceContext) {
 		{
 			todoRoutes.GET("", authUser, todoAPI.GetToDoList())
 			todoRoutes.GET("/:id", todoAPI.GetTodoDetail())
-			//todoRoutes.PUT("/:id", Handler.GetTodoDetail(database))
 			todoRoutes.DELETE("/:id", authUser, todoAPI.DeleteTodoItem())
 			todoRoutes.POST("/", authUser, todoAPI.CreateTodoItem())
 		}

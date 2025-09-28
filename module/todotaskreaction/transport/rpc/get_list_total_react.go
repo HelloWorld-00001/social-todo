@@ -26,7 +26,6 @@ func (rh rpcService) GetTotalReactByIds(ctx context.Context, request *contract.G
 	if err != nil {
 		return nil, err
 	}
-
 	result := helper.MapIntToInt32(res)
 	return &contract.GetTotalReactByIdsResponse{Result: result}, nil
 }

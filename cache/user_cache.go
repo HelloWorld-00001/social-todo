@@ -3,14 +3,14 @@ package cache
 import (
 	"context"
 	"fmt"
-	"github.com/coderconquerer/social-todo/module/account/models"
+	"github.com/coderconquerer/social-todo/module/authentication/entity"
 	"log"
 	"sync"
 )
 
 // RealStore defines the interface for fetching users from the main data store.
 type RealStore interface {
-	FindAccount(ctx context.Context, conditions map[string]interface{}) (*models.Account, error)
+	FindAccount(ctx context.Context, conditions map[string]interface{}) (*entity.Account, error)
 }
 
 // userCaching wraps a real store with caching.
@@ -30,8 +30,8 @@ func NewUserCaching(store Cache, realStore RealStore) *userCaching {
 }
 
 // FindAccount tries to find a user in the cache first, then falls back to the real store.
-func (uc *userCaching) FindAccount(ctx context.Context, conditions map[string]interface{}) (*models.Account, error) {
-	var account models.Account
+func (uc *userCaching) FindAccount(ctx context.Context, conditions map[string]interface{}) (*entity.Account, error) {
+	var account entity.Account
 
 	// build cache key based on user id
 	userId := conditions["Id"].(int)

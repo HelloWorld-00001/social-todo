@@ -43,7 +43,7 @@ func (img *Image) Scan(value interface{}) error {
 	case []byte:
 		data = v
 	default:
-		return NewBadRequestResponseWithError(errors.New("invalid type for Image Scan"), "cannot process invalid image", "")
+		return BadRequest.WithError(errors.New("invalid type for Image Scan"))
 	}
 
 	return json.Unmarshal(data, img)
@@ -74,7 +74,7 @@ func (imgs *Images) Scan(value interface{}) error {
 	case []byte:
 		data = v
 	default:
-		return NewBadRequestResponseWithError(errors.New("invalid type for Image Scan"), "cannot process invalid image", "")
+		return BadRequest.WithError(errors.New("invalid type for Image Scan"))
 	}
 
 	return json.Unmarshal(data, imgs)

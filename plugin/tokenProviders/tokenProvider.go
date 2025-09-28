@@ -22,42 +22,14 @@ type Token interface {
 	GetToken() string
 }
 
-func NewInValidTokenErr(err error) *common.AppError {
-	return common.NewBadRequestResponseWithError(
-		err,
-		"The token provided is invalid",
-		err.Error(),
-	)
+func NewInValidTokenErr(err error) error {
+	return common.BadRequest.WithError(ErrInvalidToken).WithRootCause(err)
 }
 
 var (
-	ErrInvalidToken = common.NewCustomErrorResponse(
-		errors.New("token is invalid"),
-		"The token provided is invalid",
-		"ErrInvalidToken",
-	)
-
-	ErrExpiredToken = common.NewCustomErrorResponse(
-		errors.New("token has expired"),
-		"The token has expired",
-		"ErrExpiredToken",
-	)
-
-	ErrMalformedToken = common.NewCustomErrorResponse(
-		errors.New("token is malformed"),
-		"The token is malformed or corrupted",
-		"ErrMalformedToken",
-	)
-
-	ErrGenerateToken = common.NewCustomErrorResponse(
-		errors.New("cannot generate token"),
-		"Unable to generate a new token",
-		"ErrGenerateToken",
-	)
-
-	ErrMissingToken = common.NewCustomErrorResponse(
-		errors.New("token is missing from request"),
-		"No token provided in request",
-		"ErrMissingToken",
-	)
+	ErrInvalidToken   = errors.New("invalid token")
+	ErrExpiredToken   = errors.New("token has expired")
+	ErrMalformedToken = errors.New("token is malformed")
+	ErrGenerateToken  = errors.New("cannot generate token")
+	ErrMissingToken   = errors.New("token is missing from request")
 )

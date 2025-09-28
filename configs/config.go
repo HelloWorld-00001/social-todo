@@ -4,6 +4,7 @@ import (
 	"github.com/joho/godotenv"
 	"log"
 	"os"
+	"path/filepath"
 )
 
 type Config struct {
@@ -32,10 +33,36 @@ type AWSConfig struct {
 	Domain    string
 }
 
+// InitEnv loads environment variables from .env file
+// If envPath is provided, it uses that file, otherwise falls back to default.
+// InitEnv looks for a .env file by walking upward from the current directory
+// until it finds one, and loads it into environment variables.
 func InitEnv() {
-	err := godotenv.Load("../../.env") // adjust path relative to cmd/server/main.go
+	wd, err := os.Getwd()
 	if err != nil {
-		log.Println(".env file not found, relying on environment variables")
+		log.Printf("Could not get working directory: %v", err)
+		return
+	}
+
+	// Walk upward looking for .env
+	var envPath string
+	for dir := wd; dir != filepath.Dir(dir); dir = filepath.Dir(dir) {
+		try := filepath.Join(dir, ".env")
+		if _, err := os.Stat(try); err == nil {
+			envPath = try
+			break
+		}
+	}
+
+	if envPath == "" {
+		log.Println("No .env file found, relying on system environment variables")
+		return
+	}
+
+	if err := godotenv.Load(envPath); err != nil {
+		log.Printf("Failed to load .env file at %s: %v", envPath, err)
+	} else {
+		log.Printf("Loaded environment variables from %s", envPath)
 	}
 }
 

@@ -4,7 +4,7 @@ import (
 	"context"
 	goservice "github.com/200Lab-Education/go-sdk"
 	"github.com/coderconquerer/social-todo/common"
-	"github.com/coderconquerer/social-todo/module/todoItem/Storage"
+	"github.com/coderconquerer/social-todo/module/todo/storage/mysql"
 	"github.com/coderconquerer/social-todo/pubsub"
 	"gorm.io/gorm"
 )
@@ -24,7 +24,7 @@ func DecreaseTotalReactionCount(serviceCtx goservice.ServiceContext) subJob {
 			data := message.Data().(TodoId)
 
 			// Call the storage layer to increase the like count for the given item ID
-			return Storage.GetNewMySQLConnection(db).DecreaseTotalReactionCount(ctx, data.GetTodoId())
+			return mysql.GetNewMySQLConnection(db).DecreaseTotalReactionCount(ctx, data.GetTodoId())
 		},
 	}
 }

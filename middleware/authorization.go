@@ -3,8 +3,8 @@ package middleware
 import (
 	"context"
 	"errors"
-	common2 "github.com/coderconquerer/social-todo/common"
-	"github.com/coderconquerer/social-todo/module/account/models"
+	"github.com/coderconquerer/social-todo/common"
+	"github.com/coderconquerer/social-todo/module/authentication/entity"
 	tokenProviders "github.com/coderconquerer/social-todo/plugin/tokenProviders"
 	"github.com/gin-gonic/gin"
 	"net/http"
@@ -12,11 +12,11 @@ import (
 )
 
 type AuthorizationStore interface {
-	FindAccount(c context.Context, conditions map[string]interface{}) (*models.Account, error)
+	FindAccount(c context.Context, conditions map[string]interface{}) (*entity.Account, error)
 }
 
-func ErrorWrongAuthHeader(err error) *common2.AppError {
-	return common2.NewBadRequestResponseWithError(err, "Wrong authorization header", err.Error())
+func ErrorWrongAuthHeader(err error) error {
+	return common.Unauthorized.WithError(errors.New("wrong authorization header")).WithRootCause(err)
 }
 
 func extractTokenHeader(authHeader string) (string, error) {
@@ -38,9 +38,9 @@ func RequireAuth(provider tokenProviders.TokenProvider, store AuthorizationStore
 			return
 		}
 
-		payload, err := provider.ValidateToken(tokenString)
-		if err != nil {
-			c.AbortWithStatusJSON(http.StatusUnauthorized, common2.NewUnauthorizedErrorCustom(err, "Invalid or expired token"))
+		payload, errValidate := provider.ValidateToken(tokenString)
+		if errValidate != nil {
+			c.AbortWithStatusJSON(http.StatusUnauthorized, common.Unauthorized.WithError(errors.New("invalid or expired token")).WithRootCause(errValidate))
 			return
 		}
 
@@ -49,14 +49,14 @@ func RequireAuth(provider tokenProviders.TokenProvider, store AuthorizationStore
 		}
 
 		ctx := c.Request.Context()
-		account, err := store.FindAccount(ctx, condition)
+		account, errFindAccount := store.FindAccount(ctx, condition)
 		if err != nil || account == nil {
-			c.AbortWithStatusJSON(http.StatusUnauthorized, common2.NewUnauthorizedErrorCustom(err, "Account not found"))
+			c.AbortWithStatusJSON(http.StatusUnauthorized, common.Unauthorized.WithError(errors.New("account not found")).WithRootCause(errFindAccount))
 			return
 		}
 
 		if account.User == nil {
-			c.AbortWithStatusJSON(http.StatusUnauthorized, common2.NewUnauthorizedErrorCustom(err, "Cannot get user information"))
+			c.AbortWithStatusJSON(http.StatusUnauthorized, common.Unauthorized.WithError(errors.New("cannot get user information")))
 			return
 		}
 
@@ -70,14 +70,15 @@ func RequireAuth(provider tokenProviders.TokenProvider, store AuthorizationStore
 				}
 			}
 			if !allowed {
-				c.AbortWithStatusJSON(http.StatusForbidden, common2.NewForbiddenError("Forbidden: insufficient role"))
+				c.AbortWithStatusJSON(http.StatusForbidden, common.Forbidden.WithError(errors.New("forbidden: insufficient role")))
+
 				return
 			}
 		}
 
 		// todo: check disabled account
 		// Save the account info in context
-		c.Set(common2.CurrentUserContextKey, account.User)
+		c.Set(common.CurrentUserContextKey, account.User)
 		c.Next()
 	}
 }

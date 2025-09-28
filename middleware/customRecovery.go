@@ -26,7 +26,9 @@ func CustomRecovery() gin.HandlerFunc {
 				logger.Printf("[STACK TRACE]\n%s", debug.Stack())
 
 				// Optional: You can also return a JSON response
-				c.AbortWithStatusJSON(500, common.NewInternalSeverErrorResponse(errors.New("module Server Error"), "Something went wrong with server", utils.ToString(debug.Stack())))
+				c.AbortWithStatusJSON(500, common.InternalServerError.
+					WithError(errors.New("module Server Error")).
+					WithRootCause(errors.New(utils.ToString(debug.Stack()))))
 			}
 		}()
 

@@ -10,6 +10,7 @@ import (
 	authStorage "github.com/coderconquerer/social-todo/module/authentication/storage"
 	"github.com/coderconquerer/social-todo/module/authentication/transport"
 	authGprcBusiness "github.com/coderconquerer/social-todo/module/authenticationrpc/business"
+	"github.com/coderconquerer/social-todo/module/authenticationrpc/storage"
 	"github.com/coderconquerer/social-todo/module/authenticationrpc/transport"
 	uploadBusiness "github.com/coderconquerer/social-todo/module/file/business"
 	"github.com/coderconquerer/social-todo/module/file/transport"
@@ -24,8 +25,8 @@ import (
 	userBusiness "github.com/coderconquerer/social-todo/module/user/business"
 	userStorage "github.com/coderconquerer/social-todo/module/user/storage"
 	"github.com/coderconquerer/social-todo/module/user/transport"
-	tokenPlugin "github.com/coderconquerer/social-todo/plugin/tokenProviders"
-	uploadPlugin "github.com/coderconquerer/social-todo/plugin/uploadProvider"
+	tokenPlugin "github.com/coderconquerer/social-todo/plugin/tokenprovider"
+	uploadPlugin "github.com/coderconquerer/social-todo/plugin/uploadprovider"
 	"github.com/coderconquerer/social-todo/pubsub"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -43,9 +44,9 @@ func GetTodoAPIService(sCtx serviceCtx.ServiceContext) api.TodoAPI {
 
 	database := sCtx.MustGet(common.DbMainName).(*gorm.DB)
 
-	storage := mysql.GetNewMySQLConnection(database)
+	strg := mysql.GetNewMySQLConnection(database)
 	conn, err := grpc.NewClient(
-		"0.0.0.0:"+grpcConfig.TodoReactionPort,
+		"localhost:"+grpcConfig.TodoReactionPort,
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 	)
 
@@ -56,8 +57,8 @@ func GetTodoAPIService(sCtx serviceCtx.ServiceContext) api.TodoAPI {
 	// Create client stub
 	client := contract.NewItemReactServiceClient(conn)
 	rpcClient := restapi.NewRpcClient(client)
-	repo := repository.GetNewTodoListWithReactRepo(storage, rpcClient)
-	bz := business.NewTodoBusiness(storage, repo)
+	repo := repository.GetNewTodoListWithReactRepo(strg, rpcClient)
+	bz := business.NewTodoBusiness(strg, repo)
 
 	return api.NewTodoAPI(bz)
 }
@@ -67,30 +68,38 @@ func GetAuthenticationAPIService(sCtx serviceCtx.ServiceContext) authAPI.Authent
 	database := sCtx.MustGet(common.DbMainName).(*gorm.DB)
 	tokenProvider := sCtx.MustGet(cfg.JwtConfig.JwtPrefix).(tokenPlugin.TokenProvider)
 
-	storage := authStorage.GetNewMySQLConnection(database)
+	str := authStorage.GetNewMySQLConnection(database)
 	// init services
-	bz := authBusiness.NewAuthenticationBusiness(storage, tokenProvider, 60*60*24*30)
+	bz := authBusiness.NewAuthenticationBusiness(str, tokenProvider, 60*60*24*30)
 	// todo move expire time to config
 
 	return authAPI.NewAuthenticationAPI(bz)
 }
 
-func GetAuthenticationGrpcAPIService(sCtx serviceCtx.ServiceContext) authAPI.AuthenticationAPI {
+func GetAuthenticationService(sCtx serviceCtx.ServiceContext) authBusiness.AuthenticationBusiness {
 
+	database := sCtx.MustGet(common.DbMainName).(*gorm.DB)
 	tokenProvider := sCtx.MustGet(cfg.JwtConfig.JwtPrefix).(tokenPlugin.TokenProvider)
+
+	str := authStorage.GetNewMySQLConnection(database)
+	// init services
+	return authBusiness.NewAuthenticationBusiness(str, tokenProvider, 60*60*24*30)
+}
+
+func GetAuthenticationGrpcAPIService(sCtx serviceCtx.ServiceContext) transport.AuthenticationRpcAPI {
+
 	conn, err := grpc.NewClient(
-		"0.0.0.0:"+grpcConfig.AuthenticationPort,
+		"localhost:"+grpcConfig.AuthenticationPort,
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 	)
-
 	if err != nil {
 		log.Fatalln("Failed to connect to grpc server:", err)
 	}
 
-	// init services
 	client := contract.NewAuthenticationServiceClient(conn)
-	bz := authGprcBusiness.NewAuthenticationBusinessGrpc(client, tokenProvider, 60*60*24*30)
-	// todo move expire time to config
+	rpcClient := storage.NewAuthClientGrpc(client)
+
+	bz := authGprcBusiness.NewAuthenticationBusinessGrpc(rpcClient)
 
 	return transport.NewAuthenticationAPI(bz)
 }
@@ -99,8 +108,8 @@ func GetUserAPIService(sCtx serviceCtx.ServiceContext) userApi.UserAPI {
 
 	database := sCtx.MustGet(common.DbMainName).(*gorm.DB)
 
-	storage := userStorage.GetNewMySQLConnection(database)
-	bz := userBusiness.NewUserBusiness(storage)
+	str := userStorage.GetNewMySQLConnection(database)
+	bz := userBusiness.NewUserBusiness(str)
 	return userApi.NewUserAPI(bz)
 }
 
@@ -109,10 +118,10 @@ func GetTodoReactionService(sCtx serviceCtx.ServiceContext) reactionBusiness.Rea
 	database := sCtx.MustGet(common.DbMainName).(*gorm.DB)
 	ps := sCtx.MustGet(common.PluginPubSub).(pubsub.PubSub)
 
-	storage := reactionStorage.GetNewMySQLConnection(database)
+	str := reactionStorage.GetNewMySQLConnection(database)
 
 	rabbitMQ := registerservice.NewRabbitMQPublisher("amqp://guest:guest@localhost:5672/", "RabbitMQ_Test")
-	return reactionBusiness.NewReactionBusiness(storage, ps, rabbitMQ)
+	return reactionBusiness.NewReactionBusiness(str, ps, rabbitMQ)
 }
 
 func GetTodoReactionAPIService(sCtx serviceCtx.ServiceContext) reactionAPI.ReactionTodoAPI {
@@ -120,10 +129,10 @@ func GetTodoReactionAPIService(sCtx serviceCtx.ServiceContext) reactionAPI.React
 	database := sCtx.MustGet(common.DbMainName).(*gorm.DB)
 	ps := sCtx.MustGet(common.PluginPubSub).(pubsub.PubSub)
 
-	storage := reactionStorage.GetNewMySQLConnection(database)
+	str := reactionStorage.GetNewMySQLConnection(database)
 
 	rabbitMQ := registerservice.NewRabbitMQPublisher("amqp://guest:guest@localhost:5672/", "RabbitMQ_Test")
-	bz := reactionBusiness.NewReactionBusiness(storage, ps, rabbitMQ)
+	bz := reactionBusiness.NewReactionBusiness(str, ps, rabbitMQ)
 
 	return reactionAPI.NewReactionTodoAPI(bz)
 }

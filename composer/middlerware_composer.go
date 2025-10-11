@@ -7,7 +7,7 @@ import (
 	"github.com/coderconquerer/social-todo/configs"
 	"github.com/coderconquerer/social-todo/middleware"
 	accStorage "github.com/coderconquerer/social-todo/module/authentication/storage"
-	tokenPlugin "github.com/coderconquerer/social-todo/plugin/tokenProviders"
+	tokenPlugin "github.com/coderconquerer/social-todo/plugin/tokenprovider"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 )

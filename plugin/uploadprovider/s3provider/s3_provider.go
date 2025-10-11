@@ -75,9 +75,9 @@ func (s *S3Provider) Configure() error {
 	if s.s3prefix == "" {
 		s.s3prefix = "aws-s3-prefix"
 	}
-	if s.BucketName == "" || s.Region == "" || s.AccessKey == "" || s.SecretKey == "" {
-		return fmt.Errorf("missing required S3 configuration")
-	}
+	//if s.BucketName == "" || s.Region == "" || s.AccessKey == "" || s.SecretKey == "" {
+	//	return fmt.Errorf("missing required S3 configuration")
+	//}
 	return nil
 }
 

@@ -1,9 +1,9 @@
-package jwtProvider
+package jwtprovider
 
 import (
 	"flag"
 	"github.com/coderconquerer/social-todo/common"
-	tokenProviders "github.com/coderconquerer/social-todo/plugin/tokenProviders"
+	tkp "github.com/coderconquerer/social-todo/plugin/tokenprovider"
 	"github.com/golang-jwt/jwt/v5"
 	"time"
 )
@@ -36,7 +36,7 @@ func (j *JwtProvider) InitFlags() {
 func (j *JwtProvider) Configure() error {
 	// Validate essential configuration
 	if j.secretKey == "" {
-		return tokenProviders.ErrGenerateToken
+		return tkp.ErrGenerateToken
 	}
 	if j.prefix == "" {
 		j.prefix = "jwt-prefix"
@@ -78,10 +78,10 @@ func (t *token) GetToken() string {
 	return t.Token
 }
 
-func (j *JwtProvider) GenerateToken(data tokenProviders.TokenPayload, expiry int) (tokenProviders.Token, error) {
+func (j *JwtProvider) GenerateToken(data tkp.TokenPayload, expiry int) (tkp.Token, error) {
 	if j.secretKey == "" {
 		// todo: define a more specific message
-		return nil, tokenProviders.ErrGenerateToken
+		return nil, tkp.ErrGenerateToken
 	}
 
 	claims := &myClaims{
@@ -100,15 +100,15 @@ func (j *JwtProvider) GenerateToken(data tokenProviders.TokenPayload, expiry int
 
 	signedToken, err := genToken.SignedString([]byte(j.secretKey))
 	if err != nil {
-		return nil, tokenProviders.ErrGenerateToken
+		return nil, tkp.ErrGenerateToken
 	}
 
 	return &token{Token: signedToken}, nil
 }
 
-func (j *JwtProvider) ValidateToken(tokenString string) (tokenProviders.TokenPayload, error) {
+func (j *JwtProvider) ValidateToken(tokenString string) (tkp.TokenPayload, error) {
 	if tokenString == "" {
-		return nil, tokenProviders.ErrMissingToken
+		return nil, tkp.ErrMissingToken
 	}
 
 	token, err := jwt.ParseWithClaims(
@@ -120,7 +120,7 @@ func (j *JwtProvider) ValidateToken(tokenString string) (tokenProviders.TokenPay
 	)
 
 	if err != nil {
-		return nil, tokenProviders.NewInValidTokenErr(err)
+		return nil, tkp.NewInValidTokenErr(err)
 	}
 
 	validator := *jwt.NewValidator()
@@ -132,5 +132,5 @@ func (j *JwtProvider) ValidateToken(tokenString string) (tokenProviders.TokenPay
 		return claims.MyPayload, nil
 	}
 
-	return nil, tokenProviders.ErrInvalidToken
+	return nil, tkp.ErrInvalidToken
 }

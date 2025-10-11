@@ -5,7 +5,7 @@ import (
 	"errors"
 	"github.com/coderconquerer/social-todo/common"
 	"github.com/coderconquerer/social-todo/module/authentication/entity"
-	tokenProviders "github.com/coderconquerer/social-todo/plugin/tokenProviders"
+	tokenProviders "github.com/coderconquerer/social-todo/plugin/tokenprovider"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"strings"

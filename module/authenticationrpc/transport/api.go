@@ -41,7 +41,7 @@ func (ah *authenticationAPI) Login() gin.HandlerFunc {
 			common.RespondError(c, err)
 			return
 		}
-		if result == nil {
+		if result == "" {
 			common.RespondError(c,
 				common.BadRequest.
 					WithError(entity.ErrInvalidLoginCredential).
@@ -109,7 +109,7 @@ func (ah *authenticationAPI) DisableAccount() gin.HandlerFunc {
 			return
 		}
 
-		if errDisable := ah.business.DisableAccount(c, idInt, disableInt == 1); errDisable != nil {
+		if errDisable := ah.business.DisableAccount(c, idInt, disableInt); errDisable != nil {
 			common.RespondError(c, errDisable)
 			return
 		}

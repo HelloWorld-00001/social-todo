@@ -3,6 +3,7 @@ package rpc
 import (
 	"context"
 	"errors"
+	"fmt"
 	"github.com/coderconquerer/social-todo/common"
 
 	"github.com/coderconquerer/social-todo/grpc/contract"
@@ -24,6 +25,7 @@ func NewRPCServer(b business.AuthenticationBusiness) contract.AuthenticationServ
 // ---------------------------
 
 func (s *rpcServer) Login(ctx context.Context, req *contract.LoginRequest) (*contract.LoginResponse, error) {
+	fmt.Print("Received Login request from other service")
 	acc := entity.AccountLogin{
 		Username: req.GetUsername(),
 		Password: req.GetPassword(),

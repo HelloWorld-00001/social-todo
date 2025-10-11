@@ -2,6 +2,7 @@ package servicesetup
 
 import (
 	"github.com/coderconquerer/social-todo/configs"
+	rpc2 "github.com/coderconquerer/social-todo/module/authentication/transport/rpc"
 	"go.uber.org/zap"
 	"net"
 
@@ -48,8 +49,8 @@ func StartAuthenticationGrpcServer(service goService.Service, log *zap.Logger) {
 	}
 
 	grpcServer := grpc.NewServer()
-	contract.RegisterItemReactServiceServer(grpcServer,
-		rpc.NewRpcService(composer.GetTodoReactionService(service)),
+	contract.RegisterAuthenticationServiceServer(grpcServer,
+		rpc2.NewRPCServer(composer.GetAuthenticationService(service)),
 	)
 
 	go func() {

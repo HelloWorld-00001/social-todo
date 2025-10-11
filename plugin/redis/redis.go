@@ -52,7 +52,6 @@ func (r *redisDB) InitFlags() {
 	if r.Prefix != "" {
 		prefix += "_"
 	}
-
 	flag.StringVar(
 		&r.RedisUri,
 		prefix+"-uri",
@@ -81,6 +80,7 @@ func (r *redisDB) Configure() error {
 	}
 
 	r.logger = logger.GetCurrent().GetLogger(r.name)
+	r.logger.Info("RedisDB init flags:", r.Prefix)
 	r.logger.Info("Connecting to Redis at ", r.RedisUri, "...")
 
 	opt, err := redis.ParseURL(r.RedisUri)

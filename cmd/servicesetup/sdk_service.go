@@ -7,8 +7,8 @@ import (
 	"github.com/coderconquerer/social-todo/configs"
 	"github.com/coderconquerer/social-todo/plugin/redis"
 	"github.com/coderconquerer/social-todo/plugin/rpc_caller"
-	"github.com/coderconquerer/social-todo/plugin/tokenProviders/jwtProvider"
-	"github.com/coderconquerer/social-todo/plugin/uploadProvider/s3provider"
+	"github.com/coderconquerer/social-todo/plugin/tokenprovider/jwtProvider"
+	"github.com/coderconquerer/social-todo/plugin/uploadprovider/s3provider"
 	"github.com/coderconquerer/social-todo/pubsub"
 )
 
@@ -22,7 +22,7 @@ func NewServices() goService.Service {
 		goService.WithName("social-todo-app"),
 		goService.WithVersion("1.0.0"),
 		goService.WithInitRunnable(sdkgorm.NewGormDB("main-db", common.DbMainName)),
-		goService.WithInitRunnable(jwtProvider.GetNewJwtProvider(cfg.JwtConfig.JwtPrefix, cfg.JwtConfig.SecretKey)),
+		goService.WithInitRunnable(jwtprovider.GetNewJwtProvider(cfg.JwtConfig.JwtPrefix, cfg.JwtConfig.SecretKey)),
 		goService.WithInitRunnable(s3provider.NewS3ProviderWithConfig(awsCfg)),
 		goService.WithInitRunnable(pubsub.NewLocalPubsub(common.PluginPubSub)),
 		goService.WithInitRunnable(rpc_caller.NewRpcCaller(common.PluginRPC)),

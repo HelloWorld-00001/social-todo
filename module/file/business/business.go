@@ -9,7 +9,7 @@ import (
 	"github.com/coderconquerer/social-todo/module/file/entity"
 	todoEntity "github.com/coderconquerer/social-todo/module/todo/entity"
 	userEntity "github.com/coderconquerer/social-todo/module/user/entity"
-	uploadProvider "github.com/coderconquerer/social-todo/plugin/uploadProvider"
+	uploadProvider "github.com/coderconquerer/social-todo/plugin/uploadprovider"
 	"github.com/gabriel-vasile/mimetype"
 	img "image"
 	_ "image/gif"

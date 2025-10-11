@@ -17,6 +17,7 @@ func SetupRoutes(route *gin.RouterGroup, sCtx serviceCtx.ServiceContext) {
 	reactAPI := composer.GetTodoReactionAPIService(sCtx)
 	userAPI := composer.GetUserAPIService(sCtx)
 	uploadImageAPI := composer.GetUploadFileAPIService(sCtx)
+	authGrpcAPI := composer.GetAuthenticationGrpcAPIService(sCtx)
 
 	v1 := route.Group("/v1/api")
 	{
@@ -38,6 +39,12 @@ func SetupRoutes(route *gin.RouterGroup, sCtx serviceCtx.ServiceContext) {
 		{
 			auth.POST("/login", authAPI.Login())
 			auth.POST("/register", authAPI.RegisterAccount())
+		}
+
+		rpcAuth := v1.Group("/rpc/auth")
+		{
+			rpcAuth.POST("/login", authGrpcAPI.Login())
+			rpcAuth.POST("/register", authGrpcAPI.RegisterAccount())
 		}
 
 		v1.GET("/profile", authUser, userAPI.GetUserProfile())

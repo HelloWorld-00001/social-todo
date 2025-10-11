@@ -2,7 +2,6 @@ package rpc_caller
 
 import (
 	"flag"
-	"fmt"
 	"github.com/coderconquerer/social-todo/plugin"
 	"github.com/go-resty/resty/v2"
 	"log"
@@ -41,14 +40,15 @@ func (r *rpcCaller) Get() interface{} {
 }
 
 func (r *rpcCaller) InitFlags() {
-	flag.StringVar(&r.serviceUrl, "rpc-todo-react-service-url", "http://localhost:8080/v1/api", "use to connect to todo react service")
+	flag.StringVar(&r.serviceUrl, "rpc-todo-react-service-url", "http://localhost:8081/v1/api/rpc/", "use to connect to todo react service")
 	flag.StringVar(&r.logPath, "rpc-log-file-path", "", "use to specific log file path")
+
+	// todo: 200lab.io go sdk is wrong, it doesn't auto call configure,
+	// so this is temp fix for it
+	_ = r.Configure()
 }
 
 func (r *rpcCaller) Configure() error {
-	fmt.Print("config rpc run")
-	log.Println("config here")
-
 	r.client = resty.New()
 	logFile, err := getLogFile(r.logPath)
 	if err != nil {
